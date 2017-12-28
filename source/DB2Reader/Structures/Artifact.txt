@@ -1,0 +1,1 @@
+ID,Name,BarConnectedColor,BarDisconnectedColor,TitleColor,ClassUiTextureKitID,SpecID,ArtifactCategoryID,Flags,UiModelSceneID,SpellVisualKitID,VerifiedBuild

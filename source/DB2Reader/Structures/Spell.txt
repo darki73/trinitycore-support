@@ -1,0 +1,1 @@
+name,subtext,description,aura_description,misc_id,description_variables_id

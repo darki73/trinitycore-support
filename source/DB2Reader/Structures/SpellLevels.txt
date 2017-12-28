@@ -1,0 +1,1 @@
+spell_id,base_level,max_level,spell_level,level_difficulty_id,max_usable_level

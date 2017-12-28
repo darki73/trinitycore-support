@@ -1,0 +1,1 @@
+spell_id,min_faction_id,required_area_id,required_spell_focus,facing_caster_flags,min_reputation,required_aura_vision

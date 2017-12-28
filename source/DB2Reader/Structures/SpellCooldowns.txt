@@ -1,0 +1,1 @@
+spell_id,category_recovery_time,recovery_time,start_recovery_time,cooldown_difficulty_id

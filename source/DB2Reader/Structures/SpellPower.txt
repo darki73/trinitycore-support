@@ -1,0 +1,1 @@
+spell_id,mana_cost,mana_cost_percentage,mana_cost_pps,required_aura,health_cost_percentage,power_index,power_type,mana_cost_per_level,mana_cost_per_second,mana_cost_additional,power_display_id,unit_power_bar_id

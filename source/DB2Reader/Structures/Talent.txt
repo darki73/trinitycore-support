@@ -1,0 +1,1 @@
+ID,SpellID,OverrideSpellID,Description,SpecID,TierID,ColumnIndex,Flags,CategoryMask1,CategoryMask2,ClassID,VerifiedBuild

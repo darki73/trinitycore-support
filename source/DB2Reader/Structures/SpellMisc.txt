@@ -1,0 +1,1 @@
+attributes_1,attributes_2,attributes_3,attributes_4,attributes_5,attributes_6,attributes_7,attributes_8,attributes_9,attributes_10,attributes_11,attributes_12,attributes_13,attributes_14,speed,multistrike_speed_mode,casting_time_index,duration_index,range_index,school_mask,icon_file_id,active_icon_file_id

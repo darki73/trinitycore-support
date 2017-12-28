@@ -1,0 +1,1 @@
+spell_id,shapeshift_exclude_1,shapeshift_exclude_2,shapeshift_mask_1,shapeshift_mask_2,stance_bar_order

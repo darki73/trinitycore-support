@@ -1,0 +1,1 @@
+FileDataID,GeoBoxMinX,GeoBoxMinY,GeoBoxMinZ,GeoBoxMaxX,GeoBoxMaxY,GeoBoxMaxZ,OverrideLootEffectScale,OverrideNameScale,ObjectEffectPackageID
