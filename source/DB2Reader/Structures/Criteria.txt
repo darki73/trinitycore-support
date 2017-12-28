@@ -1,1 +1,1 @@
-id,asset,start_asset,fail_asset,start_timer,modified_tree_id,world_state_id,type,start_event,fail_event,flags,world_state_value,VerifiedBuild
+id,asset,start_asset,fail_asset,start_timer,modified_tree_id,world_state_id,type,start_event,fail_event,flags,world_state_value,verified_build

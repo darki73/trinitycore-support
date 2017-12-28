@@ -1,1 +1,1 @@
-id,duration,max_duration,duration_per_level,VerifiedBuild
+id,duration,max_duration,duration_per_level,verified_build

@@ -1,1 +1,1 @@
-id,name,item_id1,item_id2,item_id3,item_id4,item_id5,item_id6,item_id7,item_id8,item_id9,item_id10,item_id11,item_id12,item_id13,item_id14,item_id15,item_id16,item_id17,required_skill_rank,required_skill,flags,VerifiedBuild
+id,name,item_id1,item_id2,item_id3,item_id4,item_id5,item_id6,item_id7,item_id8,item_id9,item_id10,item_id11,item_id12,item_id13,item_id14,item_id15,item_id16,item_id17,required_skill_rank,required_skill,flags,verified_build

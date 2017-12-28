@@ -1,1 +1,1 @@
-ID,NameMale,NameFemale,MaskID,Flags,VerifiedBuild
+id,name_male,name_female,mask_id,flags,verified_build
