@@ -164,6 +164,17 @@ class DB2Reader {
      * @throws \Exception
      */
     public function getRecordAsJson(int $id, bool $appendID = true) {
+        return json_encode($this->getRecordAsArray($id, $appendID), JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Get record as array
+     * @param int $id
+     * @param bool $appendID
+     * @return array
+     * @throws \Exception
+     */
+    public function getRecordAsArray(int $id, bool $appendID = true) {
         $finalArray = [];
         $record = $this->getRecord($id);
         if ($record === null)
@@ -178,7 +189,7 @@ class DB2Reader {
         } else {
             $finalArray[$id] = $record;
         }
-        return json_encode($finalArray, JSON_PRETTY_PRINT);
+        return $finalArray;
     }
 
     /**

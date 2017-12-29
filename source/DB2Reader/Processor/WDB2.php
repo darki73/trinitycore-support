@@ -16,15 +16,7 @@ class WDB2 extends BaseFormat {
         $this->fileManager->seekBytes(4);
         $this->isWDBC = $this->fileManager->getFormat() == 'WDBC';
         $this->headerFieldCount = $this->isWDBC ? 4 : 11;
-        $parts = array_values(
-            unpack(
-                'V' . $this->headerFieldCount . 'x',
-                fread(
-                    $this->fileManager->getFileHandle(),
-                    4 * $this->headerFieldCount
-                )
-            )
-        );
+        $parts = array_values(unpack('V' . $this->headerFieldCount . 'x', $this->fileManager->readBytes(4 * $this->headerFieldCount)));
         $this->processFields($parts)
             ->evaluateHeaderSize()
             ->hasIdBlock()

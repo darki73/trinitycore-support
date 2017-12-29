@@ -109,11 +109,13 @@ class WDB5 extends BaseFormat {
             }
         }
 
-        $fieldID = $this->fieldCount - 1;
-        $remainingBytes = $this->recordSize - $this->recordFormat[$fieldID]['offset'];
-        $this->recordFormat[$fieldID]['valueCount'] = max(1, floor($remainingBytes / $this->recordFormat[$fieldID]['valueLength']));
-        if ($this->recordFormat[$fieldID]['valueCount'] > 1 && (($this->recordSize % 4 == 0 && $remainingBytes <= 4) || (!$this->hasIdBlock && $this->idField == $fieldID))) {
-            $this->recordFormat[$fieldID]['valueCount'] = 1;
+        $fieldId = $this->fieldCount - 1;
+        $remainingBytes = $this->recordSize - $this->recordFormat[$fieldId]['offset'];
+        $this->recordFormat[$fieldId]['valueCount'] = max(1, floor($remainingBytes / $this->recordFormat[$fieldId]['valueLength']));
+        if ($this->recordFormat[$fieldId]['valueCount'] > 1 &&
+            (($this->recordSize % 4 == 0 && $remainingBytes <= 4)
+                || (!$this->hasIdBlock && $this->idField == $fieldId))) {
+            $this->recordFormat[$fieldId]['valueCount'] = 1;
         }
         if (!$this->hasIdBlock) {
             if ($this->idField >= $this->fieldCount) {
@@ -126,8 +128,8 @@ class WDB5 extends BaseFormat {
         $this->findCommonFields();
         $this->populateIdMap();
         if ($this->hasEmbeddedStrings) {
-            for ($fieldID = 0; $fieldID < $this->fieldCount; $fieldID++) {
-                unset($this->recordFormat[$fieldID]['offset']);
+            for ($fieldId = 0; $fieldId < $this->fieldCount; $fieldId++) {
+                unset($this->recordFormat[$fieldId]['offset']);
             }
             $this->populateRecordOffsets();
             if (is_null($this->stringFields)) {

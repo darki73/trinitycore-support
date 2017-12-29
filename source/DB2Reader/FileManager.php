@@ -289,7 +289,7 @@ class FileManager {
      */
     public function openFile(string $fileName, array $arguments = []) {
         $fileData = $this->availableFiles[$fileName];
-        $this->filename = $fileName;
+        $this->fileName = $fileName;
         $this->fileHandle = fopen($fileData['path'], 'rb');
         $this->performInitialProcessing();
         $this->loadStructure($fileName);

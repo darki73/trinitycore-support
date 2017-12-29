@@ -254,7 +254,6 @@ abstract class BaseFormat implements IFormat {
      */
     protected $headerLength = 0;
 
-
     /**
      * BaseFormat constructor.
      * @param FileManager $fileManager
@@ -356,7 +355,6 @@ abstract class BaseFormat implements IFormat {
             if ($format['type'] != Constants::FIELD_TYPE_UNKNOWN || $format['size'] != 4) {
                 continue;
             }
-
             $couldBeFloat = true;
             $couldBeString = !$this->hasEmbeddedStrings;
             $recordOffset = 0;
@@ -374,7 +372,7 @@ abstract class BaseFormat implements IFormat {
                                 if ($byteOffset === false) {
                                     throw new \Exception("Could not find end of embedded string $offsetFieldId x $offsetFieldValueId in record $recordOffset");
                                 }
-                                $byteOffset++; // skip null byte
+                                $byteOffset++; // skip nul byte
                             }
                         } else {
                             $byteOffset += $this->recordFormat[$offsetFieldId]['valueLength'] * $this->recordFormat[$offsetFieldId]['valueCount'];
@@ -385,7 +383,7 @@ abstract class BaseFormat implements IFormat {
                 $values = unpack('V*', $data);
                 foreach ($values as $value) {
                     if ($value == 0) {
-                        continue;
+                        continue; // can't do much with this
                     }
                     if (count($distinctValues) < Constants::DISTINCT_STRINGS_REQUIRED) {
                         $distinctValues[$value] = true;
@@ -414,7 +412,6 @@ abstract class BaseFormat implements IFormat {
                 }
                 $recordOffset++;
             }
-
             if ($couldBeString && ($this->recordCount < Constants::DISTINCT_STRINGS_REQUIRED * 2 || count($distinctValues) >= Constants::DISTINCT_STRINGS_REQUIRED)) {
                 $format['type'] = Constants::FIELD_TYPE_STRING;
                 $format['signed'] = false;
@@ -439,7 +436,9 @@ abstract class BaseFormat implements IFormat {
         if (!is_null($this->recordOffsets)) {
             $pointer = $this->recordOffsets[$recordOffset];
             if ($pointer['size'] == 0) {
+                // @codeCoverageIgnoreStart
                 throw new \Exception("Requested record offset $recordOffset which is empty");
+                // @codeCoverageIgnoreEnd
             }
             $this->fileManager->seekBytes($pointer['pos']);
             $data = $this->fileManager->readBytes($pointer['size']);
@@ -470,7 +469,7 @@ abstract class BaseFormat implements IFormat {
         if ($this->commonBlockSize == 0) {
             return;
         }
-        $commonBlockEnd = $this->commonBlockPosition + $this->commonBlockSize;
+        $commonBlockEnd = $this->commonBlockPosition+ $this->commonBlockSize;
         $this->fileManager->seekBytes($this->commonBlockPosition);
         $fieldCount = current(unpack('V', $this->fileManager->readBytes(4)));
         if ($fieldCount != $this->totalFieldCount) {
@@ -480,14 +479,16 @@ abstract class BaseFormat implements IFormat {
         for ($field = 0; $field < $this->totalFieldCount; $field++) {
             list($entryCount, $enumType) = array_values(unpack('V1x/C1y', $this->fileManager->readBytes(5)));
             $mapSize = 8 * $entryCount;
-            if (($enumType > 4) || ($entryCount > $this->recordCount) || (ftell($this->fileManager->getFileHandle()) + $mapSize + ($field + 1 < $this->totalFieldCount ? 5 : 0) > $commonBlockEnd)) {
+            if (($enumType > 4) ||
+                ($entryCount > $this->recordCount) ||
+                (ftell($this->fileManager->getFileHandle()) + $mapSize + ($field + 1 < $this->totalFieldCount ? 5 : 0) > $commonBlockEnd)) {
                 $fourBytesEveryType = false;
                 break;
-             }
-             fseek($this->fileManager->getFileHandle(), $mapSize, SEEK_CUR);
-         }
-         $fourBytesEveryType &= $commonBlockEnd - ftell($this->fileManager->getFileHandle()) <= 8;
-        fseek($this->fileManager->getFileHandle(), $this->commonBlockPos + 4);
+            }
+            $this->fileManager->seekBytes($mapSize, SEEK_CUR); // skip this field's data, continue to the next
+        }
+        $fourBytesEveryType &= $commonBlockEnd - ftell($this->fileManager->getFileHandle()) <= 8; // expect to be near the end of the common block if our assumptions held
+        $this->fileManager->seekBytes($this->commonBlockPosition+ 4); // return to first table entry
         for ($field = 0; $field < $this->totalFieldCount; $field++) {
             list($entryCount, $enumType) = array_values(unpack('V1x/C1y', $this->fileManager->readBytes(5)));
             if ($field < $this->fieldCount) {
@@ -499,44 +500,52 @@ abstract class BaseFormat implements IFormat {
             $size = 4;
             $type = Constants::FIELD_TYPE_INT;
             switch ($enumType) {
-                case 0:
+                case 0: // string
                     $type = Constants::FIELD_TYPE_STRING;
                     break;
-                case 1:
+                case 1: // short
                     $size = 2;
                     break;
-                case 2:
+                case 2: // byte
                     $size = 1;
                     break;
-                case 3:
+                case 3: // float
                     $type = Constants::FIELD_TYPE_FLOAT;
                     break;
-                case 4:
+                case 4: // 4-byte int
                     break;
                 default:
                     throw new \Exception("Unknown common field type: $enumType");
             }
             $this->recordFormat[$field] = [
-                'valueCount'    => 1,
-                'valueLength'   => $size,
-                'type'          => $type,
-                'size'          =>  4,
-                'signed'        => false,
-                'zero'          => str_repeat("\x00", $size),
+                'valueCount'  => 1,
+                'valueLength' => $size,
+                'size'        => $size,
+                'type'        => $type,
+                'signed'      => false,
+                'zero'        => str_repeat("\x00", $size),
             ];
             $this->commonLookup[$field] = [];
             $embeddedStrings = false;
             if ($this->hasEmbeddedStrings && $type == Constants::FIELD_TYPE_STRING) {
+                // @codeCoverageIgnoreStart
+                // file with both embedded strings and common block not found in wild, this is just a guess
                 $embeddedStrings = true;
                 $this->recordFormat[$field]['zero'] = "\x00";
+                // @codeCoverageIgnoreEnd
             }
             for ($entry = 0; $entry < $entryCount; $entry++) {
                 $id = current(unpack('V', $this->fileManager->readBytes(4)));
                 if ($embeddedStrings) {
-                    $maxLength = $this->commonBlockSize - (ftell($this->fileManager->getFileHandle()) - $this->commonBlockPosition);
-                    $this->commonLookup[$field][$id] = stream_get_line($this->fileManager->getFileHandle(), $maxLength, "\x00") . "\x00";
+                    // @codeCoverageIgnoreStart
+                    // file with both embedded strings and common block not found in wild, this is just a guess
+                    $maxLength = $this->commonBlockSize - (ftell($this->fileHandle) - $this->commonBlockPosition);
+                    $this->commonLookup[$field][$id] = stream_get_line($this->fileHandle, $maxLength, "\x00") . "\x00";
+                    // @codeCoverageIgnoreEnd
                 } else {
-                    $this->commonLookup[$field][$id] = ($fourBytesEveryType && $size != 4) ? substr($this->fileManager->readBytes(4), 0, $size) : $this->fileManager->readBytes($size);
+                    $this->commonLookup[$field][$id] = ($fourBytesEveryType && $size != 4) ?
+                        substr($this->fileManager->readBytes(4), 0, $size) :
+                        $this->fileManager->readBytes($size);
                 }
             }
         }
@@ -652,14 +661,16 @@ abstract class BaseFormat implements IFormat {
      */
     private function getRecordByOffset($recordOffset, $id) {
         if ($recordOffset < 0 || $recordOffset >= $this->recordCount) {
-            throw new \Exception("Requested record offset $recordOffset out of bounds: 0-".$this->recordCount);
+            // @codeCoverageIgnoreStart
+            throw new \Exception("Requested record offset $recordOffset out of bounds: 0-" . $this->recordCount);
+            // @codeCoverageIgnoreEnd
         }
         $record = $this->getRawRecord($recordOffset, $id);
         $runningOffset = 0;
         $row = [];
-        for ($fieldID = 0; $fieldID < $this->totalFieldCount; $fieldID++) {
+        for ($fieldId = 0; $fieldId < $this->totalFieldCount; $fieldId++) {
             $field = [];
-            $format = $this->recordFormat[$fieldID];
+            $format = $this->recordFormat[$fieldId];
             for ($valueId = 0; $valueId < $format['valueCount']; $valueId++) {
                 if (isset($format['storage']) && !$this->hasEmbeddedStrings) {
                     $rawValue = substr($record, $format['offset'], $format['valueLength']);
@@ -667,7 +678,7 @@ abstract class BaseFormat implements IFormat {
                         case Constants::FIELD_COMPRESSION_BITPACKED:
                         case Constants::FIELD_COMPRESSION_BITPACKED_INDEXED:
                         case Constants::FIELD_COMPRESSION_BITPACKED_INDEXED_ARRAY:
-                            $rawValue = self::extractValueFromBitstring($rawValue,
+                            $rawValue = BaseFormat::extractValueFromBitstring($rawValue,
                                 $format['storage']['offsetBits'] % 8, $format['storage']['sizeBits']);
                             if ($format['storage']['storageType'] == Constants::FIELD_COMPRESSION_BITPACKED) {
                                 $field[] = $rawValue;
@@ -731,7 +742,7 @@ abstract class BaseFormat implements IFormat {
             if (count($field) == 1) {
                 $field = $field[0];
             }
-            $row[isset($format['name']) ? $format['name'] : $fieldID] = $field;
+            $row[isset($format['name']) ? $format['name'] : $fieldId] = $field;
         }
         return $row;
     }
@@ -808,7 +819,9 @@ abstract class BaseFormat implements IFormat {
      */
     private function getString($stringBlockOffset) {
         if ($stringBlockOffset >= $this->stringBlockSize) {
-            throw new \Exception("Asked to get string from $stringBlockOffset, string block size is only " . $this->stringBlockSize);
+            // @codeCoverageIgnoreStart
+            throw new \Exception("Asked to get string from $stringBlockOffset, string block size is only ".$this->stringBlockSize);
+            // @codeCoverageIgnoreEnd
         }
         $maxLength = $this->stringBlockSize - $stringBlockOffset;
         $this->fileManager->seekBytes($this->stringBlockPosition + $stringBlockOffset);
