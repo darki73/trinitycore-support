@@ -270,6 +270,12 @@ abstract class BaseFormat implements IFormat {
     protected $fieldStorageInfoSize = 0;
 
     /**
+     * Position of the storage info block
+     * @var int
+     */
+    protected $fieldStorageInfoPosition = 0;
+
+    /**
      * Pallet data size
      * @var int
      */
@@ -286,6 +292,12 @@ abstract class BaseFormat implements IFormat {
      * @var int
      */
     protected $relationshipDataSize = 0;
+
+    /**
+     * Relationship data position
+     * @var int
+     */
+    protected $relationshipDataPosition = 0;
 
     /**
      * Offsets for record
@@ -348,11 +360,11 @@ abstract class BaseFormat implements IFormat {
      */
     public function getFieldTypes(bool $byName = true) : array {
         $fieldTypes = [];
-        foreach ($this->recordFormat as $fieldId => $format) {
+        foreach ($this->recordFormat as $fieldID => $format) {
             if ($byName && isset($format['name'])) {
-                $fieldId = $format['name'];
+                $fieldID = $format['name'];
             }
-            $fieldTypes[$fieldId] = $format['type'];
+            $fieldTypes[$fieldID] = $format['type'];
         }
         return $fieldTypes;
     }
@@ -364,21 +376,21 @@ abstract class BaseFormat implements IFormat {
      * @throws \Exception
      */
     public function setFieldsSigned(array $fields) {
-        foreach ($fields as $fieldId => $isSigned) {
-            if ($fieldId < 0 || $fieldId >= $this->totalFieldCount) {
-                throw new \Exception("Field ID $fieldId out of bounds: 0-" . ($this->totalFieldCount - 1));
+        foreach ($fields as $fieldID => $isSigned) {
+            if ($fieldID < 0 || $fieldID >= $this->totalFieldCount) {
+                throw new \Exception("Field ID $fieldID out of bounds: 0-" . ($this->totalFieldCount - 1));
             }
-            if (!$this->hasIdBlock && $this->idField == $fieldId) {
+            if (!$this->hasIdBlock && $this->idField == $fieldID) {
                 continue;
             }
-            if ($this->recordFormat[$fieldId]['type'] != Constants::FIELD_TYPE_INT) {
+            if ($this->recordFormat[$fieldID]['type'] != Constants::FIELD_TYPE_INT) {
                 continue;
             }
-            $this->recordFormat[$fieldId]['signed'] = !!$isSigned;
+            $this->recordFormat[$fieldID]['signed'] = !!$isSigned;
         }
         $signedFields = [];
-        foreach ($this->recordFormat as $fieldId => $format) {
-            $signedFields[$fieldId] = $format['signed'];
+        foreach ($this->recordFormat as $fieldID => $format) {
+            $signedFields[$fieldID] = $format['signed'];
         }
         return $signedFields;
     }
@@ -395,26 +407,26 @@ abstract class BaseFormat implements IFormat {
                 unset($names[array_search('id', $names)]);
                 $names = array_values($names);
             }
-        foreach ($names as $fieldId => $name) {
-            if (!is_numeric($fieldId)) {
-                throw new \Exception("Field ID $fieldId must be numeric");
+        foreach ($names as $fieldID => $name) {
+            if (!is_numeric($fieldID)) {
+                throw new \Exception("Field ID $fieldID must be numeric");
             }
             if (is_numeric($name)) {
-                throw new \Exception("Field $fieldId Name ($name) must NOT be numeric");
+                throw new \Exception("Field $fieldID Name ($name) must NOT be numeric");
             }
-            if ($fieldId < 0 || $fieldId >= $this->totalFieldCount) {
-                throw new \Exception("Field ID $fieldId out of bounds: 0-" . ($this->totalFieldCount - 1));
+            if ($fieldID < 0 || $fieldID >= $this->totalFieldCount) {
+                throw new \Exception("Field ID $fieldID out of bounds: 0-" . ($this->totalFieldCount - 1));
             }
             if (!$name) {
-                unset($this->recordFormat[$fieldId]['name']);
+                unset($this->recordFormat[$fieldID]['name']);
             } else {
-                $this->recordFormat[$fieldId]['name'] = $name;
+                $this->recordFormat[$fieldID]['name'] = $name;
             }
         }
         $namedFields = [];
-        foreach ($this->recordFormat as $fieldId => $format) {
+        foreach ($this->recordFormat as $fieldID => $format) {
             if (isset($format['name'])) {
-                $namedFields[$fieldId] = $format['name'];
+                $namedFields[$fieldID] = $format['name'];
             }
         }
         return $namedFields;
@@ -723,7 +735,7 @@ abstract class BaseFormat implements IFormat {
      */
     protected function detectEmbeddedStringFields() {
         $stringFields = [];
-        foreach ($this->recordFormat as $fieldId => &$format) {
+        foreach ($this->recordFormat as $fieldID => &$format) {
             if ($format['type'] != Constants::FIELD_TYPE_UNKNOWN || $format['size'] != 4) {
                 continue;
             }
@@ -733,7 +745,7 @@ abstract class BaseFormat implements IFormat {
             while ($couldBeString && $recordOffset < $this->recordCount) {
                 $data = $this->getRawRecord($recordOffset);
                 $byteOffset = 0;
-                for ($offsetFieldId = 0; $offsetFieldId < $fieldId; $offsetFieldId++) {
+                for ($offsetFieldId = 0; $offsetFieldId < $fieldID; $offsetFieldId++) {
                     if ($this->recordFormat[$offsetFieldId]['type'] == Constants::FIELD_TYPE_STRING) {
                         for ($offsetFieldValueId = 0; $offsetFieldValueId < $this->recordFormat[$offsetFieldId]['valueCount']; $offsetFieldValueId++) {
                             $byteOffset = strpos($data, "\x00", $byteOffset);
@@ -765,8 +777,8 @@ abstract class BaseFormat implements IFormat {
                 }
                 $recordOffset++;
             }
-            if ($couldBeString && ($maxLength > 2 || in_array($fieldId - 1, $stringFields))) {
-                $stringFields[] = $fieldId;
+            if ($couldBeString && ($maxLength > 2 || in_array($fieldID - 1, $stringFields))) {
+                $stringFields[] = $fieldID;
                 $format['type'] = Constants::FIELD_TYPE_STRING;
             }
         }
@@ -787,19 +799,19 @@ abstract class BaseFormat implements IFormat {
             // @codeCoverageIgnoreEnd
         }
         $record = $this->getRawRecord($recordOffset, $id);
+        $fieldMax = $id === false ? $this->fieldCount : $this->totalFieldCount;
         $runningOffset = 0;
         $row = [];
-        for ($fieldID = 0; $fieldID < $this->totalFieldCount; $fieldID++) {
+        for ($fieldID = 0; $fieldID < $fieldMax; $fieldID++) {
             $field = [];
             $format = $this->recordFormat[$fieldID];
             for ($valueId = 0; $valueId < $format['valueCount']; $valueId++) {
                 if (isset($format['storage']) && !$this->hasEmbeddedStrings) {
-                    $rawValue = substr($record, $format['offset'], $format['valueLength']);
                     switch ($format['storage']['storageType']) {
                         case Constants::FIELD_COMPRESSION_BITPACKED:
                         case Constants::FIELD_COMPRESSION_BITPACKED_INDEXED:
                         case Constants::FIELD_COMPRESSION_BITPACKED_INDEXED_ARRAY:
-                            $rawValue = BaseFormat::extractValueFromBitstring($rawValue,
+                        $rawValue = BaseFormat::extractValueFromBitstring(substr($record, $format['offset'], $format['valueLength']),
                                 $format['storage']['offsetBits'] % 8, $format['storage']['sizeBits']);
                             if ($format['storage']['storageType'] == Constants::FIELD_COMPRESSION_BITPACKED) {
                                 $field[] = $rawValue;
@@ -810,6 +822,11 @@ abstract class BaseFormat implements IFormat {
                         case Constants::FIELD_COMPRESSION_COMMON:
                             $rawValue = $this->getCommonData($format['storage'], $id);
                             break;
+                        case Constants::FIELD_COMPRESSION_NONE:
+                            $rawValue = substr($record, $format['offset'] + $valueId * $format['valueLength'], $format['valueLength']);
+                            break;
+                        default:
+                            throw new \Exception(sprintf("Field %d has an unknown storage type: %d", $fieldID, $format['storage']['storageType']));
                     }
                 } else {
                     if ($this->hasEmbeddedStrings && $format['type'] == Constants::FIELD_TYPE_STRING) {
@@ -961,6 +978,18 @@ abstract class BaseFormat implements IFormat {
                 } else {
                     $data .= $this->recordFormat[$field]['zero'];
                 }
+            }
+        }
+        if ($this->relationshipDataSize) {
+            $relationshipPosition = $recordOffset * 8 + 12;
+            if ($relationshipPosition >= $this->relationshipDataSize) {
+                throw new \Exception(sprintf("Attempted to read from offset %d in relationship map, size is only %d", $relationshipPosition, $this->relationshipDataSize));
+            }
+            fseek($this->fileHandle, $this->relationshipDataPosition + $relationshipPosition);
+            $data .= fread($this->fileHandle, 4);
+            $relationshipOffset = current(unpack('V', fread($this->fileHandle, 4)));
+            if ($relationshipOffset != $recordOffset) {
+                throw new \Exception(sprintf("Record offset %d attempted read of relationship offset %d", $recordOffset, $relationshipOffset));
             }
         }
         return $data;
