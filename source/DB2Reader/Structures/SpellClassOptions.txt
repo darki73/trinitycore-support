@@ -1,1 +1,0 @@
-spell_id,spell_class_mask1,spell_class_mask2,spell_class_mask3,spell_class_mask4,spell_class_set,modal_next_spell

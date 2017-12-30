@@ -46,8 +46,9 @@ class DB2Reader {
      * @param bool $initializeImmediately
      */
     public function __construct(bool $initializeImmediately = false) {
-        $this->fileManager = new FileManager();
-        $this->fileSystem = $this->fileManager->getFileSystem();
+        $this->fileSystem = new Filesystem();
+        $this->getLatestBuild();
+        $this->fileManager = new FileManager($this->fileSystem, $this->getBuild());
         if ($initializeImmediately)
             $this->fileManager->loadEverything($this->selectedLanguage);
     }
@@ -92,6 +93,18 @@ class DB2Reader {
     }
 
     /**
+     * Get latest build
+     */
+    public function getLatestBuild() {
+        $folders = Filesystem::filesInFolder($this->fileSystem->getStructuresFolder());
+        $buildNumbers = [];
+        foreach ($folders as $folder) {
+            $buildNumbers[] = intval(ltrim(str_replace($this->fileSystem->getStructuresFolder(), '', $folder), DIRECTORY_SEPARATOR));
+        }
+        $this->setBuild(max($buildNumbers));
+    }
+
+    /**
      * Get build used for processing
      * @return int
      */
@@ -116,14 +129,10 @@ class DB2Reader {
         if (!$this->fileManager->isReady())
             throw new \RuntimeException('Data sources are not loaded!');
         if ($this->fileManager->isFileAvailable($fileName)) {
-            try {
-                $fileName = $this->fileManager->formatFileName($fileName);
-                $this->fileManager->setFileName($fileName);
-                $this->fileManager->openFile($fileName);
-                $this->processor = $this->fileManager->getProcessor();
-            } catch (\Exception $exception) {
-                throw new \RuntimeException('We have encountered an error during file processing procedure...' . PHP_EOL . $exception->getMessage());
-            }
+            $fileName = $this->fileManager->formatFileName($fileName);
+            $this->fileManager->setFileName($fileName);
+            $this->fileManager->openFile($fileName);
+            $this->processor = $this->fileManager->getProcessor();
         } else {
             throw new \RuntimeException('File ' . $fileName . ' does not exists!');
         }
@@ -157,39 +166,11 @@ class DB2Reader {
     }
 
     /**
-     * Get record as JSON
-     * @param int $id
-     * @param bool $appendID
-     * @return string
-     * @throws \Exception
+     * Get Processor Instance
+     * @return BaseFormat|WDB2|WDB5|null
      */
-    public function getRecordAsJson(int $id, bool $appendID = true) {
-        return json_encode($this->getRecordAsArray($id, $appendID), JSON_PRETTY_PRINT);
-    }
-
-    /**
-     * Get record as array
-     * @param int $id
-     * @param bool $appendID
-     * @return array
-     * @throws \Exception
-     */
-    public function getRecordAsArray(int $id, bool $appendID = true) {
-        $finalArray = [];
-        $record = $this->getRecord($id);
-        if ($record === null)
-            throw new \RuntimeException('Record #' . $id . ' was not found in the ' . $this->fileManager->getFileName() . ' file!');
-        $record = ($appendID) ? array_merge([$id], $record, [$this->getBuild()]) : array_merge($record, [$this->getBuild()]);
-        $record = DB2Reader::flattenRecord($record);
-        if ($this->fileManager->structureExists()) {
-            $fileStructure = explode(',', $this->fileManager->getStructure());
-            foreach ($fileStructure as $index => $key) {
-                $finalArray[$id][$key] = $record[$index];
-            }
-        } else {
-            $finalArray[$id] = $record;
-        }
-        return $finalArray;
+    public function getProcessor() {
+        return $this->processor;
     }
 
     /**

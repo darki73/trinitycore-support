@@ -1,1 +1,0 @@
-spell_id,proc_charges,proc_type_mask,proc_category_recovery,cumulative_aura,aura_options_difficulty_id,proc_chance,spell_ppm_id

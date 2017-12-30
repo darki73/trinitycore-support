@@ -1,1 +1,0 @@
-id,amount,description,parent,flags,operator,criteria_id,order_index,unk1,verified_build

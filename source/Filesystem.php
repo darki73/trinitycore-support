@@ -52,6 +52,14 @@ class Filesystem {
     }
 
     /**
+     * Get Structures folder path
+     * @return string
+     */
+    public function getStructuresFolder() : string {
+        return __DIR__ . DIRECTORY_SEPARATOR . 'DB2Reader' . DIRECTORY_SEPARATOR . 'Structures' . DIRECTORY_SEPARATOR;
+    }
+
+    /**
      * Set public folder path
      * @param string $path
      */

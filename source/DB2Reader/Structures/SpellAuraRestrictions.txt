@@ -1,1 +1,0 @@
-spell_id,caster_aura_spell,target_aura_spell,exclude_caster_aura_spell,exclude_target_aura_spell,restriction_difficulty_id,caster_aura_state,target_aura_state,exclude_caster_aura_state,exclude_target_aura_state

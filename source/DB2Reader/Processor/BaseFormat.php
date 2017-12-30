@@ -1,4 +1,5 @@
 <?php namespace FreedomCore\TrinityCore\Support\DB2Reader\Processor;
+
 use FreedomCore\TrinityCore\Support\DB2Reader\Constants;
 use FreedomCore\TrinityCore\Support\DB2Reader\FileManager;
 
@@ -14,265 +15,319 @@ abstract class BaseFormat implements IFormat {
      * File Manager Instance
      * @var FileManager|null
      */
-    protected $fileManager          = null;
+    protected $fileManager = null;
+
+    /**
+     * File Handle Resource
+     * @var null|resource
+     */
+    protected $fileHandle = null;
 
     /**
      * String Fields Array
-     * @var null|array
+     * @var array|null
      */
-    protected $stringFields         = null;
+    protected $stringFields = null;
 
     /**
-     * Version of the file (build number)
+     * File Format String
+     * @var null|string
+     */
+    protected $fileFormat = null;
+
+    /**
+     * File Size
+     * @var null|int
+     */
+    protected $fileSize = 0;
+
+    /**
+     * WDB Version Number
      * @var int
      */
-    protected $wdbVersion           = 0;
+    protected $wdbVersion = 0;
 
     /**
-     * Is file used for processing of type WDBC
+     * Is this a WDB file
      * @var bool
      */
-    protected $isWDBC               = false;
+    protected $isWDB = false;
 
     /**
-     * Field Identification Number
+     * WDC Version Number
      * @var int
      */
-    protected $idField              = 0;
+    protected $wdcVersion = 0;
 
     /**
-     * Map of identification numbers
-     * @var array
+     * Is this a WDC file
+     * @var bool
      */
-    protected $idMap                = [];
+    protected $isWDC = false;
 
     /**
-     * Headers count
+     * How many fields does header have
      * @var int
      */
-    protected $headerFieldCount     = 0;
-
-    /**
-     * Records count
-     * @var int
-     */
-    protected $recordCount          = 0;
-
-    /**
-     * Fields count
-     * @var int
-     */
-    protected $fieldCount           = 0;
-
-    /**
-     * Size of the record
-     * @var int
-     */
-    protected $recordSize           = 0;
-
-    /**
-     * Size of the string block
-     * @var int
-     */
-    protected $stringBlockSize      = 0;
-
-    /**
-     * Hash of the table name
-     * @var int
-     */
-    protected $tableHash            = 0;
-
-    /**
-     * This is a hash field that changes only when the structure of the data changes
-     * @var int
-     */
-    protected $layoutHash           = 0;
-
-    /**
-     * Build number
-     * @var int
-     */
-    protected $build                = 0;
-
-    /**
-     * Timestamp
-     * @var int
-     */
-    protected $timestamp            = 0;
-
-    /**
-     * Flags
-     * @var int
-     */
-    protected $flags                = 0;
-
-    /**
-     * Minimal Identification Number
-     * @var int
-     */
-    protected $minId                = 0;
-
-    /**
-     * Maximal Identification Number
-     * @var int
-     */
-    protected $maxId                = 0;
-
-    /**
-     * Locale of the file
-     * @var int
-     */
-    protected $locale               = 0;
-
-    /**
-     * Common block size
-     * @var int
-     */
-    protected $commonBlockSize      = 0;
-
-    /**
-     * Copy block size
-     * @var int
-     */
-    protected $copyBlockSize        = 0;
-
-    /**
-     * Size of the header
-     * @var int
-     */
-    protected $headerSize           = 0;
+    protected $headerFieldCount = 0;
 
     /**
      * Format of the header
-     * @var null|string
+     * @var string|null
      */
-    protected $headerFormat         = null;
+    protected $headerFormat = null;
 
     /**
-     * Length of the preamble
-     * @var int
-     */
-    protected $preambleLength       = 0;
-
-    /**
-     * Does file has embedded strings
-     * @var bool
-     */
-    protected $hasEmbeddedStrings   = false;
-
-    /**
-     * Total fields count
-     * @var int
-     */
-    protected $totalFieldCount      = 0;
-
-    /**
-     * Does file has id block
-     * @var bool
-     */
-    protected $hasIdBlock           = false;
-
-    /**
-     * Does file has ids in the index block
-     * @var bool
-     */
-    protected $hasIdsInIndexBlock   = false;
-
-    /**
-     * Position of the id block
-     * @var int
-     */
-    protected $idBlockPosition      = 0;
-
-    /**
-     * Position of the index block
-     * @var int
-     */
-    protected $indexBlockPosition   = 0;
-
-    /**
-     * Common block position
-     * @var int
-     */
-    protected $commonBlockPosition  = 0;
-
-    /**
-     * String block position
-     * @var int
-     */
-    protected $stringBlockPosition  = 0;
-
-    /**
-     * Copy block position
-     * @var int
-     */
-    protected $copyBlockPosition    = 0;
-
-    /**
-     * Position of the EoF
-     * @var int
-     */
-    protected $endOfFile            = 0;
-
-    /**
-     * Format for the record
-     * @var array
-     */
-    protected $recordFormat         = [];
-
-    /**
-     * Offsets for the records
-     * @var null
-     */
-    protected $recordOffsets        = null;
-
-    protected $commonLookup         = [];
-
-    protected $bitpackedDataPosition = 0;
-
-    protected $lookupColumnCount = 0;
-
-    protected $offsetMapPosition = 0;
-
-    protected $idListSize = 0;
-
-    protected $fieldStorageInfoPosition = 0;
-
-    protected $fieldStorageInfoSize = 0;
-
-    protected $palletDataPosition = 0;
-
-    protected $palletDataSize = 0;
-
-    protected $relationshipDataPosition = 0;
-
-    protected $relationshipDataSize = 0;
-
-    /**
-     * Length of the header
+     * Header Length
      * @var int
      */
     protected $headerLength = 0;
 
     /**
+     * Header Size
+     * @var int
+     */
+    protected $headerSize = 0;
+
+    /**
+     * Whether file has Embedded Strings
+     * @var bool|int
+     */
+    protected $hasEmbeddedStrings = false;
+
+    /**
+     * Whether file has ID Block
+     * @var int
+     */
+    protected $hasIdBlock = 0;
+
+    /**
+     * Whether file has IDs in the Index Block
+     * @var bool
+     */
+    protected $hasIdsInIndexBlock = false;
+
+    /**
+     * Position of the ID Block
+     * @var int
+     */
+    protected $idBlockPosition = 0;
+
+    /**
+     * Length of the preamble
+     * @var int
+     */
+    protected $preambleLength = 0;
+
+    /**
+     * Number of records in file
+     * @var int
+     */
+    protected $recordCount = 0;
+
+    /**
+     * Number of fields in file
+     * @var int
+     */
+    protected $fieldCount = 0;
+
+    /**
+     * Size of the record
+     * @var int
+     */
+    protected $recordSize = 0;
+
+    /**
+     * Size of the string block
+     * @var int
+     */
+    protected $stringBlockSize = 0;
+
+    /**
+     * Position of the string block
+     * @var int
+     */
+    protected $stringBlockPosition = 0;
+
+    /**
+     * Table Hash
+     * @var int|string
+     */
+    protected $tableHash = 0;
+
+    /**
+     * Layout Hash
+     * @var int|string
+     */
+    protected $layoutHash = 0;
+
+    /**
+     * Build number
+     * @var int
+     */
+    protected $build = 0;
+
+    /**
+     * Timestamp
+     * @var int
+     */
+    protected $timestamp = 0;
+
+    /**
+     * Smallest ID
+     * @var int
+     */
+    protected $minId = 0;
+
+    /**
+     * Biggest ID
+     * @var int
+     */
+    protected $maxId = 0;
+
+    /**
+     * ID Map Array
+     * @var array
+     */
+    protected $idMap = [];
+
+    /**
+     * Locale ID
+     * @var int
+     */
+    protected $locale = 0;
+
+    /**
+     * Size of the copy block
+     * @var int
+     */
+    protected $copyBlockSize = 0;
+
+    /**
+     * Position of the copy block
+     * @var int
+     */
+    protected $copyBlockPosition = 0;
+
+    /**
+     * Flags
+     * @var int
+     */
+    protected $flags = 0;
+
+    /**
+     * ID Field position
+     * @var int
+     */
+    protected $idField = 0;
+
+    /**
+     * Total fields count
+     * @var int
+     */
+    protected $totalFieldCount = 0;
+
+    /**
+     * Common block size
+     * @var int
+     */
+    protected $commonBlockSize = 0;
+
+    /**
+     * Common block position
+     * @var int
+     */
+    protected $commonBlockPosition = 0;
+
+    /**
+     * Bitpacked Data Position
+     * @var int
+     */
+    protected $bitpackedDataPosition = 0;
+
+    /**
+     * Number of lookup columns
+     * @var int
+     */
+    protected $lookupColumnCount = 0;
+
+    /**
+     * Position of the index block
+     * @var int
+     */
+    protected $indexBlockPosition = 0;
+
+    /**
+     * Size of the ID list
+     * @var int
+     */
+    protected $idListSize = 0;
+
+    /**
+     * Size of the storage info field
+     * @var int
+     */
+    protected $fieldStorageInfoSize = 0;
+
+    /**
+     * Pallet data size
+     * @var int
+     */
+    protected $palletDataSize = 0;
+
+    /**
+     * Palled data position
+     * @var int
+     */
+    protected $palletDataPosition = 0;
+
+    /**
+     * Relationship data size
+     * @var int
+     */
+    protected $relationshipDataSize = 0;
+
+    /**
+     * Offsets for record
+     * @var array|null
+     */
+    protected $recordOffsets = null;
+
+    /**
+     * Common Lookup Array
+     * @var array
+     */
+    protected $commonLookup = [];
+
+    /**
+     * Record Format Array
+     * @var array
+     */
+    protected $recordFormat = [];
+
+    /**
      * BaseFormat constructor.
      * @param FileManager $fileManager
-     * @param null $stringFields
+     * @param array $stringFields
+     * @throws \Exception
      */
-    public function __construct(FileManager $fileManager, $stringFields = null) {
+    public function __construct(FileManager $fileManager, array $stringFields = []) {
         $this->fileManager = $fileManager;
         $this->stringFields = $stringFields;
-        $this->prepareFile();
+        $this->setFileHandle()->setFileFormat()->setFileSize()->getFileVersion()->initializeHeaderStructure()->finalPreparations();
     }
 
     /**
-     * Get Record
-     * @param $id
+     * Get record by ID
+     * @param int $id
      * @return array|null
      * @throws \Exception
      */
-    public function getRecord($id) {
-        return (!isset($this->idMap[$id])) ? null : $this->getRecordByOffset($this->idMap[$id], $id);
+    public function getRecord(int $id) {
+        if (!isset($this->idMap[$id])) {
+            return null;
+        }
+        return $this->getRecordByOffset($this->idMap[$id], $id);
     }
 
     /**
@@ -287,29 +342,127 @@ abstract class BaseFormat implements IFormat {
     }
 
     /**
-     * Get IDs
+     * Get field types
+     * @param bool $byName
      * @return array
      */
-    public function getIDs() {
+    public function getFieldTypes(bool $byName = true) : array {
+        $fieldTypes = [];
+        foreach ($this->recordFormat as $fieldId => $format) {
+            if ($byName && isset($format['name'])) {
+                $fieldId = $format['name'];
+            }
+            $fieldTypes[$fieldId] = $format['type'];
+        }
+        return $fieldTypes;
+    }
+
+    /**
+     * Set signed flag to specified fields
+     * @param array $fields
+     * @return array
+     * @throws \Exception
+     */
+    public function setFieldsSigned(array $fields) {
+        foreach ($fields as $fieldId => $isSigned) {
+            if ($fieldId < 0 || $fieldId >= $this->totalFieldCount) {
+                throw new \Exception("Field ID $fieldId out of bounds: 0-" . ($this->totalFieldCount - 1));
+            }
+            if (!$this->hasIdBlock && $this->idField == $fieldId) {
+                continue;
+            }
+            if ($this->recordFormat[$fieldId]['type'] != Constants::FIELD_TYPE_INT) {
+                continue;
+            }
+            $this->recordFormat[$fieldId]['signed'] = !!$isSigned;
+        }
+        $signedFields = [];
+        foreach ($this->recordFormat as $fieldId => $format) {
+            $signedFields[$fieldId] = $format['signed'];
+        }
+        return $signedFields;
+    }
+
+    /**
+     * Set names for the fields
+     * @param array $names
+     * @return array
+     * @throws \Exception
+     */
+    public function setFieldNames(array $names) {
+        if ($this->totalFieldCount !== count($names))
+            if (in_array('id', $names)) {
+                unset($names[array_search('id', $names)]);
+                $names = array_values($names);
+            }
+        foreach ($names as $fieldId => $name) {
+            if (!is_numeric($fieldId)) {
+                throw new \Exception("Field ID $fieldId must be numeric");
+            }
+            if (is_numeric($name)) {
+                throw new \Exception("Field $fieldId Name ($name) must NOT be numeric");
+            }
+            if ($fieldId < 0 || $fieldId >= $this->totalFieldCount) {
+                throw new \Exception("Field ID $fieldId out of bounds: 0-" . ($this->totalFieldCount - 1));
+            }
+            if (!$name) {
+                unset($this->recordFormat[$fieldId]['name']);
+            } else {
+                $this->recordFormat[$fieldId]['name'] = $name;
+            }
+        }
+        $namedFields = [];
+        foreach ($this->recordFormat as $fieldId => $format) {
+            if (isset($format['name'])) {
+                $namedFields[$fieldId] = $format['name'];
+            }
+        }
+        return $namedFields;
+    }
+
+    /**
+     * Get total number of fields in the file
+     * @return int
+     */
+    public function getFieldCount() {
+        return $this->totalFieldCount;
+    }
+
+    /**
+     * Get layout hash
+     * @return int|string
+     */
+    public function getLayoutHash() {
+        return $this->layoutHash;
+    }
+
+    /**
+     * Get list of the IDs
+     * @return array
+     */
+    public function getIDs() : array {
         return array_keys($this->idMap);
     }
 
     /**
-     * Validate That File Sizes Match
+     * Check if we've reached end of file
+     * @param int $startPosition
+     * @param int $endPosition
      * @throws \Exception
      */
-    public function validateEndOfFile() {
-        $this->endOfFile = $this->copyBlockPosition + $this->copyBlockSize;
-        if ($this->endOfFile != $this->fileManager->getProcessedSize()) {
-            throw new \Exception("Expected size: " . $this->endOfFile . ", actual size: " . $this->fileManager->getProcessedSize());
+    protected function isEndOfFile(int $startPosition, int $endPosition) {
+        $endOfFile = $startPosition + $endPosition;
+        if ($endOfFile != $this->fileSize) {
+            throw new \Exception('Expected size: ' . $endOfFile . ', actual size: ' . $this->fileSize);
         }
     }
 
     /**
-     * Populate ID Map Array
+     * Populate ID Map
      * @throws \Exception
      */
-    protected function populateIDMap() {
+    protected function populateIdMap() {
+        $this->idMap = [];
         if (!$this->hasIdBlock) {
             $this->recordFormat[$this->idField]['signed'] = false;
             for ($x = 0; $x < $this->recordCount; $x++) {
@@ -317,28 +470,28 @@ abstract class BaseFormat implements IFormat {
                 $this->idMap[$rec[$this->idField]] = $x;
             }
         } else {
-            $this->fileManager->seekBytes($this->idBlockPosition);
-            if ($this->fileManager->getFormat() == 'WDB2') {
+            fseek($this->fileHandle, $this->idBlockPosition);
+            if ($this->fileFormat == 'WDB2') {
                 for ($x = $this->minId; $x <= $this->maxId; $x++) {
-                    $record = current(unpack('V', $this->fileManager->readBytes(4)));
+                    $record = current(unpack('V', fread($this->fileHandle, 4)));
                     if ($record) {
                         $this->idMap[$x] = $record - 1;
                     }
-                    $this->fileManager->seekBytes(2, SEEK_CUR);
+                    fseek($this->fileHandle, 2, SEEK_CUR);
                 }
             } else {
                 for ($x = 0; $x < $this->recordCount; $x++) {
-                    $this->idMap[current(unpack('V', $this->fileManager->readBytes(4)))] = $x;
+                    $this->idMap[current(unpack('V', fread($this->fileHandle, 4)))] = $x;
                 }
             }
         }
         if ($this->copyBlockSize) {
-            $this->fileManager->seekBytes($this->copyBlockPosition);
+            fseek($this->fileHandle, $this->copyBlockPosition);
             $entryCount = floor($this->copyBlockSize / 8);
             for ($x = 0; $x < $entryCount; $x++) {
-                list($newId, $existingId) = array_values(unpack('V*', $this->fileManager->readBytes(8)));
+                list($newId, $existingId) = array_values(unpack('V*', fread($this->fileHandle, 8)));
                 if (!isset($this->idMap[$existingId])) {
-                    throw new \Exception("Copy block referenced ID " . $existingId . " which does not exist");
+                    throw new \Exception('Copy block referenced ID ' . $existingId . ' which does not exist!');
                 }
                 $this->idMap[$newId] = $this->idMap[$existingId];
             }
@@ -347,11 +500,11 @@ abstract class BaseFormat implements IFormat {
     }
 
     /**
-     * Guess Types Of Fields
+     * Guess Type of the fields in the file
      * @throws \Exception
      */
     protected function guessFieldTypes() {
-        foreach ($this->recordFormat as $fieldId => &$format) {
+        foreach ($this->recordFormat as $fieldID => &$format) {
             if ($format['type'] != Constants::FIELD_TYPE_UNKNOWN || $format['size'] != 4) {
                 continue;
             }
@@ -365,7 +518,7 @@ abstract class BaseFormat implements IFormat {
                     $byteOffset = $format['offset'];
                 } else {
                     $byteOffset = 0;
-                    for ($offsetFieldId = 0; $offsetFieldId < $fieldId; $offsetFieldId++) {
+                    for ($offsetFieldId = 0; $offsetFieldId < $fieldID; $offsetFieldId++) {
                         if ($this->recordFormat[$offsetFieldId]['type'] == Constants::FIELD_TYPE_STRING) {
                             for ($offsetFieldValueId = 0; $offsetFieldValueId < $this->recordFormat[$offsetFieldId]['valueCount']; $offsetFieldValueId++) {
                                 $byteOffset = strpos($data, "\x00", $byteOffset);
@@ -383,7 +536,7 @@ abstract class BaseFormat implements IFormat {
                 $values = unpack('V*', $data);
                 foreach ($values as $value) {
                     if ($value == 0) {
-                        continue; // can't do much with this
+                        continue;
                     }
                     if (count($distinctValues) < Constants::DISTINCT_STRINGS_REQUIRED) {
                         $distinctValues[$value] = true;
@@ -392,8 +545,8 @@ abstract class BaseFormat implements IFormat {
                         if ($value > $this->stringBlockSize) {
                             $couldBeString = false;
                         } else {
-                            $this->fileManager->seekBytes($this->stringBlockPosition + $value - 1);
-                            if ($this->fileManager->readBytes(1) !== "\x00") {
+                            fseek($this->fileHandle, $this->stringBlockPosition + $value - 1);
+                            if (fread($this->fileHandle, 1) !== "\x00") {
                                 $couldBeString = false;
                             }
                         }
@@ -426,41 +579,6 @@ abstract class BaseFormat implements IFormat {
     }
 
     /**
-     * Get Raw Record Data
-     * @param integer|string $recordOffset
-     * @param bool $id
-     * @return bool|string
-     * @throws \Exception
-     */
-    protected function getRawRecord($recordOffset, $id = false) {
-        if (!is_null($this->recordOffsets)) {
-            $pointer = $this->recordOffsets[$recordOffset];
-            if ($pointer['size'] == 0) {
-                // @codeCoverageIgnoreStart
-                throw new \Exception("Requested record offset $recordOffset which is empty");
-                // @codeCoverageIgnoreEnd
-            }
-            $this->fileManager->seekBytes($pointer['pos']);
-            $data = $this->fileManager->readBytes($pointer['size']);
-        } else {
-            $this->fileManager->seekBytes($this->headerSize + $recordOffset * $this->recordSize);
-            $data = $this->fileManager->readBytes($this->recordSize);
-        }
-        if ($this->fileManager->getFormat() == 'WDB6' && $id !== false && $this->commonBlockSize) {
-            $lastFieldFormat = $this->recordFormat[$this->fieldCount - 1];
-            $data = substr($data, 0, $lastFieldFormat['offset'] + $lastFieldFormat['valueLength']);
-            foreach ($this->commonLookup as $field => $lookup) {
-                if (isset($lookup[$id])) {
-                    $data .= $lookup[$id];
-                } else {
-                    $data .= $this->recordFormat[$field]['zero'];
-                }
-            }
-        }
-        return $data;
-    }
-
-    /**
      * Find Common Fields
      * @throws \Exception
      */
@@ -469,28 +587,28 @@ abstract class BaseFormat implements IFormat {
         if ($this->commonBlockSize == 0) {
             return;
         }
-        $commonBlockEnd = $this->commonBlockPosition+ $this->commonBlockSize;
-        $this->fileManager->seekBytes($this->commonBlockPosition);
-        $fieldCount = current(unpack('V', $this->fileManager->readBytes(4)));
+        $commonBlockEnd = $this->commonBlockPosition + $this->commonBlockSize;
+        fseek($this->fileHandle, $this->commonBlockPosition);
+        $fieldCount = current(unpack('V', fread($this->fileHandle, 4)));
         if ($fieldCount != $this->totalFieldCount) {
             throw new \Exception(sprintf("Expected %d fields in common block, found %d", $this->totalFieldCount, $fieldCount));
         }
         $fourBytesEveryType = true;
         for ($field = 0; $field < $this->totalFieldCount; $field++) {
-            list($entryCount, $enumType) = array_values(unpack('V1x/C1y', $this->fileManager->readBytes(5)));
+            list($entryCount, $enumType) = array_values(unpack('V1x/C1y', fread($this->fileHandle, 5)));
             $mapSize = 8 * $entryCount;
             if (($enumType > 4) ||
                 ($entryCount > $this->recordCount) ||
-                (ftell($this->fileManager->getFileHandle()) + $mapSize + ($field + 1 < $this->totalFieldCount ? 5 : 0) > $commonBlockEnd)) {
+                (ftell($this->fileHandle) + $mapSize + ($field + 1 < $this->totalFieldCount ? 5 : 0) > $commonBlockEnd)) {
                 $fourBytesEveryType = false;
                 break;
             }
-            $this->fileManager->seekBytes($mapSize, SEEK_CUR); // skip this field's data, continue to the next
+            fseek($this->fileHandle, $mapSize, SEEK_CUR);
         }
-        $fourBytesEveryType &= $commonBlockEnd - ftell($this->fileManager->getFileHandle()) <= 8; // expect to be near the end of the common block if our assumptions held
-        $this->fileManager->seekBytes($this->commonBlockPosition+ 4); // return to first table entry
+        $fourBytesEveryType &= $commonBlockEnd - ftell($this->fileHandle) <= 8;
+        fseek($this->fileHandle, $this->commonBlockPosition + 4);
         for ($field = 0; $field < $this->totalFieldCount; $field++) {
-            list($entryCount, $enumType) = array_values(unpack('V1x/C1y', $this->fileManager->readBytes(5)));
+            list($entryCount, $enumType) = array_values(unpack('V1x/C1y', fread($this->fileHandle, 5)));
             if ($field < $this->fieldCount) {
                 if ($entryCount > 0) {
                     throw new \Exception(sprintf("Expected 0 entries in common block field %d, instead found %d", $field, $entryCount));
@@ -535,7 +653,7 @@ abstract class BaseFormat implements IFormat {
                 // @codeCoverageIgnoreEnd
             }
             for ($entry = 0; $entry < $entryCount; $entry++) {
-                $id = current(unpack('V', $this->fileManager->readBytes(4)));
+                $id = current(unpack('V', fread($this->fileHandle, 4)));
                 if ($embeddedStrings) {
                     // @codeCoverageIgnoreStart
                     // file with both embedded strings and common block not found in wild, this is just a guess
@@ -544,18 +662,18 @@ abstract class BaseFormat implements IFormat {
                     // @codeCoverageIgnoreEnd
                 } else {
                     $this->commonLookup[$field][$id] = ($fourBytesEveryType && $size != 4) ?
-                        substr($this->fileManager->readBytes(4), 0, $size) :
-                        $this->fileManager->readBytes($size);
+                        substr(fread($this->fileHandle, 4), 0, $size) :
+                        fread($this->fileHandle, $size);
                 }
             }
         }
     }
 
     /**
-     * Populate Offsets For Record
+     * Populate record offsets array
      */
     protected function populateRecordOffsets() {
-        $this->fileManager->seekBytes($this->indexBlockPosition);
+        fseek($this->fileHandle, $this->indexBlockPosition);
         $this->recordOffsets = [];
         if ($this->hasIdsInIndexBlock) {
             $this->idMap = [];
@@ -568,10 +686,10 @@ abstract class BaseFormat implements IFormat {
         $seenBefore = [];
         for ($x = $lowerBound; $x <= $upperBound; $x++) {
             if ($this->hasIdsInIndexBlock) {
-                $pointer = unpack('Vid/Vpos/vsize', $this->fileManager->readBytes(10));
+                $pointer = unpack('Vid/Vpos/vsize', fread($this->fileHandle, 10));
                 $this->idMap[$pointer['id']] = $x;
             } else {
-                $pointer = unpack('Vpos/vsize', $this->fileManager->readBytes(6));
+                $pointer = unpack('Vpos/vsize', fread($this->fileHandle, 6));
                 $pointer['id'] = $x;
             }
             if ($pointer['size'] > 0) {
@@ -600,13 +718,13 @@ abstract class BaseFormat implements IFormat {
     }
 
     /**
-     * Detect if field is and embedded string field
+     * Detect embedded string fields
      * @throws \Exception
      */
     protected function detectEmbeddedStringFields() {
         $stringFields = [];
-        foreach ($this->recordFormat as $fieldID => &$format) {
-            if ($format['type'] != Constants::FIELD_TYPE_UNKNOWN || $format['valueLength'] != 4) {
+        foreach ($this->recordFormat as $fieldId => &$format) {
+            if ($format['type'] != Constants::FIELD_TYPE_UNKNOWN || $format['size'] != 4) {
                 continue;
             }
             $couldBeString = true;
@@ -615,14 +733,17 @@ abstract class BaseFormat implements IFormat {
             while ($couldBeString && $recordOffset < $this->recordCount) {
                 $data = $this->getRawRecord($recordOffset);
                 $byteOffset = 0;
-                for ($offsetFieldId = 0; $offsetFieldId < $fieldID; $offsetFieldId++) {
+                for ($offsetFieldId = 0; $offsetFieldId < $fieldId; $offsetFieldId++) {
                     if ($this->recordFormat[$offsetFieldId]['type'] == Constants::FIELD_TYPE_STRING) {
                         for ($offsetFieldValueId = 0; $offsetFieldValueId < $this->recordFormat[$offsetFieldId]['valueCount']; $offsetFieldValueId++) {
                             $byteOffset = strpos($data, "\x00", $byteOffset);
                             if ($byteOffset === false) {
+                                // should never happen, we just assigned this field as a string in a prior loop!
+                                // @codeCoverageIgnoreStart
                                 throw new \Exception("Could not find end of embedded string $offsetFieldId x $offsetFieldValueId in record $recordOffset");
+                                // @codeCoverageIgnoreEnd
                             }
-                            $byteOffset++;
+                            $byteOffset++; // skip nul byte
                         }
                     } else {
                         $byteOffset += $this->recordFormat[$offsetFieldId]['valueLength'] * $this->recordFormat[$offsetFieldId]['valueCount'];
@@ -644,8 +765,8 @@ abstract class BaseFormat implements IFormat {
                 }
                 $recordOffset++;
             }
-            if ($couldBeString && ($maxLength > 2 || in_array($fieldID - 1, $stringFields))) {
-                $stringFields[] = $fieldID;
+            if ($couldBeString && ($maxLength > 2 || in_array($fieldId - 1, $stringFields))) {
+                $stringFields[] = $fieldId;
                 $format['type'] = Constants::FIELD_TYPE_STRING;
             }
         }
@@ -654,12 +775,12 @@ abstract class BaseFormat implements IFormat {
 
     /**
      * Get Record By Offset
-     * @param integer|string $recordOffset
-     * @param integer $id
+     * @param int $recordOffset
+     * @param bool $id
      * @return array
      * @throws \Exception
      */
-    private function getRecordByOffset($recordOffset, $id) {
+    private function getRecordByOffset(int $recordOffset, bool $id) {
         if ($recordOffset < 0 || $recordOffset >= $this->recordCount) {
             // @codeCoverageIgnoreStart
             throw new \Exception("Requested record offset $recordOffset out of bounds: 0-" . $this->recordCount);
@@ -668,9 +789,9 @@ abstract class BaseFormat implements IFormat {
         $record = $this->getRawRecord($recordOffset, $id);
         $runningOffset = 0;
         $row = [];
-        for ($fieldId = 0; $fieldId < $this->totalFieldCount; $fieldId++) {
+        for ($fieldID = 0; $fieldID < $this->totalFieldCount; $fieldID++) {
             $field = [];
-            $format = $this->recordFormat[$fieldId];
+            $format = $this->recordFormat[$fieldID];
             for ($valueId = 0; $valueId < $format['valueCount']; $valueId++) {
                 if (isset($format['storage']) && !$this->hasEmbeddedStrings) {
                     $rawValue = substr($record, $format['offset'], $format['valueLength']);
@@ -742,38 +863,20 @@ abstract class BaseFormat implements IFormat {
             if (count($field) == 1) {
                 $field = $field[0];
             }
-            $row[isset($format['name']) ? $format['name'] : $fieldId] = $field;
+            $row[isset($format['name']) ? $format['name'] : $fieldID] = $field;
         }
         return $row;
     }
 
     /**
-     * Extract value from string
-     * @param $bitString
-     * @param $bitOffset
-     * @param $bitLength
-     * @return int
-     */
-    protected function extractValueFromBitstring($bitString, $bitOffset, $bitLength) {
-        if ($bitOffset >= 8) {
-            $bitString = substr($bitString, floor($bitOffset / 8));
-            $bitOffset &= 7;
-        }
-        $gmp = gmp_import($bitString, 1, GMP_LSW_FIRST | GMP_LITTLE_ENDIAN);
-        $mask = ((gmp_init(1) << $bitLength) - 1);
-        $gmp = gmp_and($gmp >> $bitOffset, $mask);
-        return gmp_intval($gmp);
-    }
-
-    /**
-     * Get pallet data
+     * Get Pallet Data
      * @param $storage
      * @param $palletId
      * @param $valueId
      * @return mixed
      * @throws \Exception
      */
-    protected function getPalletData($storage, $palletId, $valueId) {
+    private function getPalletData($storage, $palletId, $valueId) {
         $recordSize = 4;
         $isArray = $storage['storageType'] == Constants::FIELD_COMPRESSION_BITPACKED_INDEXED_ARRAY;
         if ($isArray) {
@@ -783,37 +886,37 @@ abstract class BaseFormat implements IFormat {
         if ($offset > $this->palletDataSize) {
             throw new \Exception(sprintf("Requested pallet data offset %d which is beyond pallet data size %d", $offset, $this->palletDataSize));
         }
-        $this->fileManager->seekBytes($this->palletDataPosition + $offset);
-        return current(unpack('V', $this->fileManager->readBytes(4)));
+        fseek($this->fileHandle, $this->palletDataPosition + $offset);
+        return current(unpack('V', fread($this->fileHandle, 4)));
     }
 
     /**
-     * Get common data
+     * Get Common Data
      * @param $storage
      * @param $id
      * @return bool|string
      */
-    protected function getCommonData($storage, $id) {
+    private function getCommonData($storage, $id) {
         $lo = 0;
         $hi = floor($storage['additionalDataSize'] / 8) - 1;
         while ($lo <= $hi) {
             $mid = (int)(($hi - $lo) / 2) + $lo;
-            $this->fileManager->seekBytes($this->commonBlockPosition + $storage['blockOffset'] + ($mid * 8));
-            $thisId = current(unpack('V', $this->fileManager->readBytes(4)));
+            fseek($this->fileHandle, $this->commonBlockPosition + $storage['blockOffset'] + ($mid * 8));
+            $thisId = current(unpack('V', fread($this->fileHandle, 4)));
             if ($thisId < $id) {
                 $lo = $mid + 1;
             } elseif ($thisId > $id) {
                 $hi = $mid - 1;
             } else {
-                return $this->fileManager->readBytes(4);
+                return fread($this->fileHandle, 4);
             }
         }
         return $storage['defaultValue'];
     }
-    
+
     /**
      * Get String
-     * @param string|integer $stringBlockOffset
+     * @param $stringBlockOffset
      * @return string
      * @throws \Exception
      */
@@ -824,8 +927,256 @@ abstract class BaseFormat implements IFormat {
             // @codeCoverageIgnoreEnd
         }
         $maxLength = $this->stringBlockSize - $stringBlockOffset;
-        $this->fileManager->seekBytes($this->stringBlockPosition + $stringBlockOffset);
-        return stream_get_line($this->fileManager->getFileHandle(), $maxLength, "\x00");
+        fseek($this->fileHandle, $this->stringBlockPosition + $stringBlockOffset);
+        return stream_get_line($this->fileHandle, $maxLength, "\x00");
     }
 
+    /**
+     * Get Raw Record
+     * @param int $recordOffset
+     * @param bool $id
+     * @return bool|string
+     * @throws \Exception
+     */
+    private function getRawRecord(int $recordOffset, bool $id = false) {
+        if (!is_null($this->recordOffsets)) {
+            $pointer = $this->recordOffsets[$recordOffset];
+            if ($pointer['size'] == 0) {
+                // @codeCoverageIgnoreStart
+                throw new \Exception("Requested record offset $recordOffset which is empty");
+                // @codeCoverageIgnoreEnd
+            }
+            fseek($this->fileHandle, $pointer['pos']);
+            $data = fread($this->fileHandle, $pointer['size']);
+        } else {
+            fseek($this->fileHandle, $this->headerSize + $recordOffset * $this->recordSize);
+            $data = fread($this->fileHandle, $this->recordSize);
+        }
+        if ($this->fileFormat == 'WDB6' && $id !== false && $this->commonBlockSize) {
+            $lastFieldFormat = $this->recordFormat[$this->fieldCount - 1];
+            $data = substr($data, 0, $lastFieldFormat['offset'] + $lastFieldFormat['valueLength']);
+            foreach ($this->commonLookup as $field => $lookup) {
+                if (isset($lookup[$id])) {
+                    $data .= $lookup[$id];
+                } else {
+                    $data .= $this->recordFormat[$field]['zero'];
+                }
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Populate file handle variable
+     * @return BaseFormat
+     */
+    private function setFileHandle() : BaseFormat {
+        $this->fileHandle = $this->fileManager->getFileHandle();
+        return $this;
+    }
+    
+    /**
+     * Populate file format variable
+     * @return BaseFormat
+     */
+    private function setFileFormat() : BaseFormat {
+        $this->fileFormat = $this->fileManager->getFormat();
+        return $this;
+    }
+
+    /**
+     * Populate file size variable
+     * @return BaseFormat
+     */
+    private function setFileSize() : BaseFormat {
+        $this->fileSize = $this->fileManager->getProcessedSize();
+        return $this;
+    }
+
+    /**
+     * Get File Version Number and Type
+     * @return BaseFormat
+     */
+    private function getFileVersion() : BaseFormat {
+        $isWDB = strstr($this->fileFormat, 'WDB') ? true : false;
+        if ($isWDB) {
+            $this->isWDB = true;
+            $this->getWDBVersion();
+        } else {
+            $this->isWDC = true;
+            $this->getWDCVersion();
+        }
+        return $this;
+    }
+
+    /**
+     * Get WDB Version Number
+     * @return BaseFormat
+     */
+    private function getWDBVersion() : BaseFormat {
+        $this->wdbVersion = intval(substr($this->fileFormat, 3));
+        $this->isWDC = false;
+        return $this;
+    }
+
+    /**
+     * Get WDC Version Number
+     * @return BaseFormat
+     */
+    private function getWDCVersion() : BaseFormat {
+        $this->wdcVersion = intval(substr($this->fileFormat, 3));
+        $this->isWDB = false;
+        return $this;
+    }
+
+    /**
+     * Initialize File Header Structure
+     * @return BaseFormat
+     */
+    private function initializeHeaderStructure() : BaseFormat {
+        if ($this->isWDB) {
+            if ($this->wdbVersion >= 6) {
+                $this->preambleLength = 56;
+                $this->headerFormat = 'V10x/v2y/V2z';
+            } else if ($this->wdbVersion < 6 && $this->wdbVersion > 2) {
+                $this->preambleLength = 48;
+                $this->headerFormat = 'V10x/v2y';
+            } else if ($this->wdbVersion === 2) {
+                $this->headerFieldCount = 11;
+            } else {
+                $this->headerFieldCount = 4;
+            }
+            if ($this->wdbVersion > 2) {
+                fseek($this->fileHandle, 4);
+                $parts = array_values(unpack($this->headerFormat, fread($this->fileHandle, $this->preambleLength - 4)));
+            } else {
+                $parts = array_values(unpack('V' . $this->headerFieldCount . 'x', fread($this->fileHandle, 4 * $this->headerFieldCount)));
+            }
+        } else if ($this->isWDC) {
+            $this->headerLength = 84;
+            $this->headerFormat = 'V10x/v2y/V9z';
+            fseek($this->fileHandle, 4);
+            $parts = array_values(unpack($this->headerFormat, fread($this->fileHandle, $this->headerLength - 4)));
+        } else {
+            $parts = [];
+            BaseFormat::throwRuntimeException('Unknown file format ' . $this->fileFormat . '!');
+        }
+        $this->updateFileStructureData($parts);
+        return $this;
+    }
+
+    /**
+     * Update file structure details
+     * @param array $parts
+     * @return BaseFormat
+     */
+    private function updateFileStructureData(array $parts) : BaseFormat {
+        if ($this->headerFormat === null) {
+            $this->recordCount      = $parts[0];
+            $this->fieldCount       = $parts[1];
+            $this->recordSize       = $parts[2];
+            $this->stringBlockSize  = $parts[3];
+            $this->tableHash        = ($this->wdbVersion === 0) ? 0 : $parts[4];
+            $this->build            = ($this->wdbVersion === 0) ? 0 : $parts[5];
+            $this->timestamp        = ($this->wdbVersion === 0) ? 0 : $parts[6];
+            $this->minId            = ($this->wdbVersion === 0) ? 0 : $parts[7];
+            $this->maxId            = ($this->wdbVersion === 0) ? 0 : $parts[8];
+            $this->locale           = ($this->wdbVersion === 0) ? 0 : $parts[9];
+            $this->copyBlockSize    = ($this->wdbVersion === 0) ? 0 : $parts[10];
+        } else {
+            switch ($this->headerFormat) {
+                case 'V10x/v2y/V2z':
+                case 'V10x/v2y':
+                        $this->recordCount      = $parts[0];
+                        $this->fieldCount       = $parts[1];
+                        $this->recordSize       = $parts[2];
+                        $this->stringBlockSize  = $parts[3];
+                        $this->tableHash        = $parts[4];
+                        $this->layoutHash       = $parts[5];
+                        $this->minId            = $parts[6];
+                        $this->maxId            = $parts[7];
+                        $this->locale           = $parts[8];
+                        $this->copyBlockSize    = $parts[9];
+                        $this->flags            = $parts[10];
+                        $this->idField          = $parts[11];
+                        $this->totalFieldCount  = ($this->wdbVersion >= 6) ? $parts[12] : $this->fieldCount;
+                        $this->commonBlockSize  = ($this->wdbVersion >= 6) ? $parts[13] : 0;
+                    break;
+                case 'V10x/v2y/V9z':
+                    $this->recordCount              = $parts[0];
+                    $this->fieldCount               = $parts[1];
+                    $this->recordSize               = $parts[2];
+                    $this->stringBlockSize          = $parts[3];
+                    $this->tableHash                = $parts[4];
+                    $this->layoutHash               = $parts[5];
+                    $this->minId                    = $parts[6];
+                    $this->maxId                    = $parts[7];
+                    $this->locale                   = $parts[8];
+                    $this->copyBlockSize            = $parts[9];
+                    $this->flags                    = $parts[10];
+                    $this->idField                  = $parts[11];
+                    $this->totalFieldCount          = $parts[12];
+                    $this->bitpackedDataPosition    = $parts[13];
+                    $this->lookupColumnCount        = $parts[14];
+                    $this->indexBlockPosition       = $parts[15];
+                    $this->idListSize               = $parts[16];
+                    $this->fieldStorageInfoSize     = $parts[17];
+                    $this->commonBlockSize          = $parts[18];
+                    $this->palletDataSize           = $parts[19];
+                    $this->relationshipDataSize     = $parts[20];
+                    break;
+                default:
+                    BaseFormat::throwRuntimeException('Unknown file format ' . $this->fileFormat . '!');
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Perform final preparations
+     */
+    private function finalPreparations() {
+        if ($this->isWDB) {
+            if ($this->wdbVersion >= 5) {
+                $this->headerSize = $this->preambleLength + $this->fieldCount * 4;
+                $this->hasEmbeddedStrings = ($this->flags & 1) > 0;
+                $this->hasIdBlock = ($this->flags & 4) > 0;
+            } else {
+                $this->headerSize = 4 * ($this->headerFieldCount + 1);
+                $this->hasEmbeddedStrings = false;
+                $this->totalFieldCount = $this->fieldCount;
+                $this->hasIdBlock = $this->maxId > 0;
+            }
+        } else {
+            $this->headerSize = $this->headerLength + $this->fieldCount * 4;
+            $this->hasEmbeddedStrings = ($this->flags & 1) > 0;
+            $this->hasIdBlock = ($this->flags & 4) > 0;
+        }
+    }
+
+    /**
+     * Throw Runtime Exception with message
+     * @param string $message
+     */
+    private static function throwRuntimeException(string $message) {
+        throw new \RuntimeException(sprintf('%s::%s(): %s',substr(strrchr(__CLASS__, "\\"), 1), debug_backtrace()[1]['function'], $message));
+    }
+
+    /**
+     * Extract Value From Bit String
+     * @param $bitString
+     * @param $bitOffset
+     * @param $bitLength
+     * @return int
+     */
+    private function extractValueFromBitstring($bitString, $bitOffset, $bitLength) {
+        if ($bitOffset >= 8) {
+            $bitString = substr($bitString, floor($bitOffset / 8));
+            $bitOffset &= 7;
+        }
+        $gmp = gmp_import($bitString, 1, GMP_LSW_FIRST | GMP_LITTLE_ENDIAN);
+        $mask = ((gmp_init(1) << $bitLength) - 1);
+        $gmp = gmp_and($gmp >> $bitOffset, $mask);
+        return gmp_intval($gmp);
+    }
 }

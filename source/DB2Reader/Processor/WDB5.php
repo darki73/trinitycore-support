@@ -1,6 +1,7 @@
 <?php namespace FreedomCore\TrinityCore\Support\DB2Reader\Processor;
 
 use FreedomCore\TrinityCore\Support\DB2Reader\Constants;
+use FreedomCore\TrinityCore\Support\DB2Reader\FileManager;
 
 /**
  * Class WDB5
@@ -9,73 +10,26 @@ use FreedomCore\TrinityCore\Support\DB2Reader\Constants;
 class WDB5 extends BaseFormat {
 
     /**
-     * @inheritdoc
+     * WDB5 constructor.
+     * @param FileManager $fileManager
+     * @param array $stringFields
+     * @throws \Exception
      */
-    public function prepareFile() {
-        $this->wdbVersion = intval(substr($this->fileManager->getFormat(), 3));
-        if ($this->wdbVersion >= 6) {
-            $this->preambleLength = 56;
-            $this->headerFormat = 'V10x/v2y/V2z';
-        } else {
-            $this->preambleLength = 48;
-            $this->headerFormat = 'V10x/v2y';
-        }
-        $this->fileManager->seekBytes(4);
-        $parts = array_values(unpack($this->headerFormat, $this->fileManager->readBytes($this->preambleLength - 4)));
-        $this->processFields($parts)
-            ->evaluateHeaderSize()
-            ->hasIdBlock()
-            ->getBlocksPositions();
-        $this->processFile();
+    public function __construct(FileManager $fileManager, array $stringFields = []) {
+        parent::__construct($fileManager, $stringFields);
+        $this->processBlocks()->processRecordFormat()->finalizeProcessing();
     }
 
     /**
      * @inheritdoc
+     * @return WDB5
      */
-    public function processFields($parts) {
-        $this->recordCount      = $parts[0];
-        $this->fieldCount       = $parts[1];
-        $this->recordSize       = $parts[2];
-        $this->stringBlockSize  = $parts[3];
-        $this->tableHash        = $parts[4];
-        $this->layoutHash       = $parts[5];
-        $this->minId            = $parts[6];
-        $this->maxId            = $parts[7];
-        $this->locale           = $parts[8];
-        $this->copyBlockSize    = $parts[9];
-        $this->flags            = $parts[10];
-        $this->idField          = $parts[11];
-        $this->totalFieldCount  = $this->wdbVersion >= 6 ? $parts[12] : $this->fieldCount;
-        $this->commonBlockSize  = $this->wdbVersion >= 6 ? $parts[13] : 0;
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function evaluateHeaderSize() {
-        $this->headerSize = $this->preambleLength + $this->fieldCount * 4;
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function hasIdBlock() {
-        $this->hasEmbeddedStrings = ($this->flags & 1) > 0;
-        $this->hasIdBlock = ($this->flags & 4) > 0;
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getBlocksPositions() {
+    public function processBlocks() : WDB5 {
         if ($this->hasEmbeddedStrings) {
             if (!$this->hasIdBlock) {
                 throw new \Exception("File has embedded strings and no ID block, which was not expected, aborting");
             }
-            $this->stringBlockPosition = $this->fileManager->getProcessedSize() - $this->copyBlockSize - $this->commonBlockSize - ($this->recordCount * 4);
+            $this->stringBlockPosition = $this->fileSize - $this->copyBlockSize - $this->commonBlockSize - ($this->recordCount * 4);
             $this->indexBlockPosition = $this->stringBlockSize;
             $this->stringBlockSize = 0;
         } else {
@@ -84,17 +38,19 @@ class WDB5 extends BaseFormat {
         $this->idBlockPosition = $this->stringBlockPosition + $this->stringBlockSize;
         $this->copyBlockPosition = $this->idBlockPosition + ($this->hasIdBlock ? $this->recordCount * 4 : 0);
         $this->commonBlockPosition = $this->copyBlockPosition + $this->copyBlockSize;
+        $this->isEndOfFile($this->commonBlockPosition, $this->commonBlockSize);
         return $this;
     }
 
     /**
      * @inheritdoc
+     * @return WDB5
      */
-    public function processFile() {
-        $this->fileManager->seekBytes($this->preambleLength);
+    public function processRecordFormat() : WDB5 {
+        fseek($this->fileHandle, $this->preambleLength);
         $this->recordFormat = [];
         for ($fieldId = 0; $fieldId < $this->fieldCount; $fieldId++) {
-            $this->recordFormat[$fieldId] = unpack('vbitShift/voffset', $this->fileManager->readBytes(4));
+            $this->recordFormat[$fieldId] = unpack('vbitShift/voffset', fread($this->fileHandle, 4));
             $this->recordFormat[$fieldId]['valueLength'] = ceil((32 - $this->recordFormat[$fieldId]['bitShift']) / 8);
             $this->recordFormat[$fieldId]['size'] = $this->recordFormat[$fieldId]['valueLength'];
             $this->recordFormat[$fieldId]['type'] = ($this->recordFormat[$fieldId]['size'] != 4) ? Constants::FIELD_TYPE_INT : Constants::FIELD_TYPE_UNKNOWN;
@@ -108,13 +64,10 @@ class WDB5 extends BaseFormat {
                     floor(($this->recordFormat[$fieldId]['offset'] - $this->recordFormat[$fieldId - 1]['offset']) / $this->recordFormat[$fieldId - 1]['valueLength']);
             }
         }
-
         $fieldId = $this->fieldCount - 1;
         $remainingBytes = $this->recordSize - $this->recordFormat[$fieldId]['offset'];
         $this->recordFormat[$fieldId]['valueCount'] = max(1, floor($remainingBytes / $this->recordFormat[$fieldId]['valueLength']));
-        if ($this->recordFormat[$fieldId]['valueCount'] > 1 &&
-            (($this->recordSize % 4 == 0 && $remainingBytes <= 4)
-                || (!$this->hasIdBlock && $this->idField == $fieldId))) {
+        if ($this->recordFormat[$fieldId]['valueCount'] > 1 && (($this->recordSize % 4 == 0 && $remainingBytes <= 4) || (!$this->hasIdBlock && $this->idField == $fieldId))) {
             $this->recordFormat[$fieldId]['valueCount'] = 1;
         }
         if (!$this->hasIdBlock) {
@@ -125,6 +78,14 @@ class WDB5 extends BaseFormat {
                 throw new \Exception("Expected ID field " . $this->idField . " reportedly has " . $this->recordFormat[$this->idField]['valueCount'] . " values per row");
             }
         }
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     * @return WDB5
+     */
+    public function finalizeProcessing() : WDB5 {
         $this->findCommonFields();
         $this->populateIdMap();
         if ($this->hasEmbeddedStrings) {
@@ -137,6 +98,7 @@ class WDB5 extends BaseFormat {
             }
         }
         $this->guessFieldTypes();
+        return $this;
     }
 
 }

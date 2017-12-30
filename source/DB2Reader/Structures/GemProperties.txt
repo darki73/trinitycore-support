@@ -1,1 +1,0 @@
-id,type,enchant_id,min_item_level,verified_build

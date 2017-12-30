@@ -1,6 +1,5 @@
 <?php namespace FreedomCore\TrinityCore\Support\DB2Reader;
 
-use File;
 use FreedomCore\TrinityCore\Support\Filesystem;
 use FreedomCore\TrinityCore\Support\DB2Reader\Processor\WDC1;
 use FreedomCore\TrinityCore\Support\DB2Reader\Processor\WDB5;
@@ -12,6 +11,12 @@ use FreedomCore\TrinityCore\Support\DB2Reader\Processor\BaseFormat;
  * @package FreedomCore\TrinityCore\Support\DB2Manager
  */
 class FileManager {
+
+    /**
+     * Build Number
+     * @var null|int
+     */
+    protected $build = null;
 
     /**
      * Filesystem Instance
@@ -45,7 +50,7 @@ class FileManager {
 
     /**
      * File structure
-     * @var null|string
+     * @var null|array
      */
     protected $fileStructure = null;
 
@@ -81,9 +86,12 @@ class FileManager {
 
     /**
      * FileManager constructor.
+     * @param Filesystem $fs
+     * @param int $build
      */
-    public function __construct() {
-        $this->fileSystem = new Filesystem();
+    public function __construct(Filesystem $fs, int $build) {
+        $this->fileSystem = $fs;
+        $this->build = $build;
     }
 
     /**
@@ -152,9 +160,9 @@ class FileManager {
 
     /**
      * Get File Structure
-     * @return null|string
+     * @return null|array
      */
-    public function getStructure() {
+    public function getStructure() : array {
         return $this->fileStructure;
     }
 
@@ -311,12 +319,13 @@ class FileManager {
      * Seek Bytes In File
      * @param integer $bytes
      * @param mixed|null extra
+     * @return int
      */
     public function seekBytes(int $bytes, $extra = null)  {
         if ($extra !== null)
-            fseek($this->fileHandle, $bytes, $extra);
+            return fseek($this->fileHandle, $bytes, $extra);
         else
-            fseek($this->fileHandle, $bytes);
+            return fseek($this->fileHandle, $bytes);
     }
 
     /**
@@ -376,10 +385,11 @@ class FileManager {
      * Perform initial file processing
      */
     protected function performInitialProcessing() {
+        $status = fstat($this->fileHandle);
         $this->initialProcessing = [
-            'status'    =>  fstat($this->fileHandle),
-            'size'      =>  fstat($this->fileHandle)['size'],
-            'format'    =>  fread($this->fileHandle, 4)
+            'status'    =>  $status,
+            'size'      =>  $status['size'],
+            'format'    =>  $this->readBytes(4)
         ];
     }
 
@@ -409,21 +419,22 @@ class FileManager {
                 throw new \Exception("Unknown DB2 format: " . $this->getFormat());
 
         }
+        if ($this->structureExists()) {
+            $this->processor->setFieldNames($this->getStructure());
+        }
     }
 
     /**
      * Load file structure
      * @param string $fileName
      * @return $this
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     private function loadStructure(string $fileName) {
-        $structuresDirectory = __DIR__ . DIRECTORY_SEPARATOR . 'Structures';
-        $structureFile = $structuresDirectory . DIRECTORY_SEPARATOR . $fileName . '.txt';
+        $structureFile = $this->fileSystem->getStructuresFolder() . $this->build . DIRECTORY_SEPARATOR . $fileName . '.txt';
         $fileFound = Filesystem::fileExists($structureFile);
         if ($fileFound) {
             $this->structureExists = true;
-            $this->fileStructure = File::get($structureFile);
+            $this->fileStructure = file($structureFile, FILE_IGNORE_NEW_LINES);
         }
         return $this;
     }

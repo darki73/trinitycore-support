@@ -1,1 +1,0 @@
-id,value1,value2,bonus_list_id,type,index,verified_build

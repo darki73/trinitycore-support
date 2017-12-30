@@ -7,47 +7,24 @@
 interface IFormat {
 
     /**
-     * Prepare file for parsing
-     * @return mixed
-     */
-    public function prepareFile();
-
-    /**
-     * Process General Fields
-     * @param array $parts
-     * @return mixed
-     */
-    public function processFields($parts);
-
-    /**
-     * Calculate Header Size
-     * @return mixed
-     */
-    public function evaluateHeaderSize();
-
-    /**
-     * Check if file has ID Block
-     * @return mixed
-     */
-    public function hasIdBlock();
-
-    /**
-     * Get Blocks Positions
-     * @return mixed
-     */
-    public function getBlocksPositions();
-
-    /**
-     * Validate That File Sizes Match
+     * Process Blocks Information
      * @throws \Exception
+     * @return $this
      */
-    public function validateEndOfFile();
+    public function processBlocks();
 
     /**
-     * Process File
-     * @return mixed
+     * Process Record Format Information
+     * @throws \Exception
+     * @return $this
      */
-    public function processFile();
+    public function processRecordFormat();
 
+    /**
+     * Finalize Data Processing
+     * @throws \Exception
+     * @return $this
+     */
+    public function finalizeProcessing();
 
 }

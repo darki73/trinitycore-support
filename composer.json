@@ -40,5 +40,12 @@
     "scripts": {
         "test": "phpunit",
         "cs": "phpcs --standard=psr2 ./source"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FreedomCore\\TrinityCore\\Support\\SupportServiceProvider"
+            ]
+        }
     }
 }

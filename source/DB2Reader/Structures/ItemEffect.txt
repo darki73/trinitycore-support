@@ -1,1 +1,0 @@
-id,item_id,spell_id,cooldown,category_cooldown,charges,category,specialization_id,order_index,trigger,verified_build

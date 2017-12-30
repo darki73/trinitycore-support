@@ -1,1 +1,0 @@
-ID,AreaName,LocLeft,LocRight,LocTop,LocBottom,MapID,AreaID,DisplayMapID,DefaultDungeonFloor,ParentWorldMapID,Flags,LevelRangeMin,LevelRangeMax,BountySetID,BountyBoardLocation,ID,PlayerConditionID,VerifiedBuild

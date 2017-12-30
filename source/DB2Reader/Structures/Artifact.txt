@@ -1,1 +1,0 @@
-id,name,bar_connected_color,bar_disconnected_color,title_color,class_ui_texture_kit_id,spec_id,artifact_category_id,flags,ui_model_scene_id,spell_visual_kit_id,verified_build

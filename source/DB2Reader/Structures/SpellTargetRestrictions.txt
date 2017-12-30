@@ -1,1 +1,0 @@
-spell_id,cone_angle,width,targets,target_creature_type,restriction_difficulty_id,max_affected_targets,max_target_level

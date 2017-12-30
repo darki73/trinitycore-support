@@ -1,1 +1,0 @@
-id,min_range_hostile,min_range_friend,max_range_hostile,max_range_friend,display_name,display_name_short,flags,VerifiedBuild

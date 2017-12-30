@@ -1,1 +1,0 @@
-title,description,flags,reward,map_id,supercedes,category,ui_order,shares_criteria,criteria_tree,faction,points,minimum_criteria,id,icon_file_data_id

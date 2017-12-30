@@ -1,1 +1,0 @@
-spell_id,aura_interrupt_flags_1,aura_interrupt_flags_2,channel_interrupt_flags_1,channel_interrupt_flags_2,interrupt_flags,interrupt_difficulty_id
