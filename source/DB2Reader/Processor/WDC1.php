@@ -16,7 +16,7 @@ class WDC1 extends BaseFormat {
      * @throws \Exception
      */
     public function __construct(FileManager $fileManager, array $stringFields = []) {
-        parent::__construct($fileManager, $this->stringFields);
+        parent::__construct($fileManager, $stringFields);
         $this->processBlocks()->processRecordFormat()->finalizeProcessing();
     }
 
