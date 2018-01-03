@@ -35,7 +35,7 @@
         }
     },
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.1"
     },
     "scripts": {
         "test": "phpunit",
@@ -47,5 +47,14 @@
                 "FreedomCore\\TrinityCore\\Support\\SupportServiceProvider"
             ]
         }
-    }
+    },
+    "repositories": [
+        {
+            "packagist": false
+        },
+        {
+            "type": "composer",
+            "url": "https://packagist.org/"
+        }
+    ]
 }
