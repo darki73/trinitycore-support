@@ -116,10 +116,6 @@ class Filesystem {
         }, glob($path . '/*', GLOB_NOSORT));
     }
 
-    public static function get(string $path) {
-
-    }
-
     /**
      * Initialize required variables.
      */

@@ -42,6 +42,12 @@ class DB2Reader {
     protected $build = null;
 
     /**
+     * Displays whether the file is already opened or not
+     * @var bool
+     */
+    protected $fileOpened = false;
+
+    /**
      * DB2Reader constructor.
      * @param bool $initializeImmediately
      */
@@ -51,6 +57,10 @@ class DB2Reader {
         $this->fileManager = new FileManager($this->fileSystem, $this->getBuild());
         if ($initializeImmediately)
             $this->fileManager->loadEverything($this->selectedLanguage);
+        else {
+            $this->fileManager->loadDataDirectory();
+            $this->fileManager->loadAvailableLanguages();
+        }
     }
 
     /**
@@ -133,9 +143,18 @@ class DB2Reader {
             $this->fileManager->setFileName($fileName);
             $this->fileManager->openFile($fileName);
             $this->processor = $this->fileManager->getProcessor();
+            $this->fileOpened = true;
         } else {
             throw new \RuntimeException('File ' . $fileName . ' does not exists!');
         }
+    }
+
+    /**
+     * Check if file is already opened
+     * @return bool
+     */
+    public function isFileOpened() : bool {
+        return $this->fileOpened;
     }
 
     /**

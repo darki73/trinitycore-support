@@ -1,7 +1,5 @@
 <?php namespace FreedomCore\TrinityCore\Support\Classes;
 
-use FreedomCore\TrinityCore\Console\Classes\Item;
-
 /**
  * Class Durability
  * @package FreedomCore\TrinityCore\Support\Classes
@@ -9,11 +7,13 @@ use FreedomCore\TrinityCore\Console\Classes\Item;
  */
 class Durability {
 
+    protected $item = null;
+
     /**
      * Quality Multipliers Variables
      * @var array
      */
-    protected static $qualityMultipliers = [
+    protected $qualityMultipliers = [
         0.92,
         0.92,
         0.92,
@@ -28,7 +28,7 @@ class Durability {
      * Armor Multipliers Variables
      * @var array
      */
-    protected static $armorMultipliers = [
+    protected $armorMultipliers = [
         0.00, // Inventory Type: Non Equip
         0.60, // Inventory Type: Head
         0.00, // Inventory Type: Neck
@@ -60,7 +60,7 @@ class Durability {
         0.00, // Inventory Type: Relic
     ];
 
-    protected static $weaponMultipliers = [
+    protected $weaponMultipliers = [
         0.91, // Weapon Subclass: Axe
         1.00, // Weapon Subclass: Axe 2
         1.00, // Weapon Subclass: BOW
@@ -83,5 +83,32 @@ class Durability {
         0.66, // Weapon Subclass: WAND
         0.66, // Weapon Subclass: FISHING_POLE
     ];
+
+    /**
+     * Durability constructor.
+     * @param Item $item
+     */
+    public function __construct(Item $item) {
+        $this->item = $item;
+    }
+
+    /**
+     * Get item durability
+     * @return int
+     */
+    public function getItemDurability() : int {
+        $item = $this->item;
+        if (!$item->isArmor() && !$item->isWeapon())
+            return 0;
+        $levelPenalty = 1.0;
+        if ($item->getItemLevel() <= 28)
+            $levelPenalty = 0.966 - floatval(28 - $item->getitemLevel()) / 54.0;
+        if ($item->isArmor()) {
+            $result = 5 * round(25.0 * $this->qualityMultipliers[$item->getQuality()] * $this->armorMultipliers[$item->getInventoryType()] * $levelPenalty);
+        } else {
+            $result = 5 * round(18.0 * $this->qualityMultipliers[$item->getQuality()] * $this->weaponMultipliers[$item->getSubClass()] * $levelPenalty);
+        }
+        return intval($result);
+    }
 
 }

@@ -21,7 +21,7 @@ class SyncStructures extends Command {
      * @inheritdoc
      * @var string
      */
-    protected $signature = 'db2:structure:sync {--build=25480}';
+    protected $signature = 'db2:structure:sync {--build=25549}';
 
     /**
      * The console command description.
