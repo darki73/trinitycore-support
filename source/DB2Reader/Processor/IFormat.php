@@ -4,7 +4,8 @@
  * Interface IFormat
  * @package FreedomCore\TrinityCore\Support\DB2Reader\Processor
  */
-interface IFormat {
+interface IFormat
+{
 
     /**
      * Process Blocks Information
@@ -26,5 +27,4 @@ interface IFormat {
      * @return $this
      */
     public function finalizeProcessing();
-
 }

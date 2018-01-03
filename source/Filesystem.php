@@ -4,7 +4,8 @@
  * Class Filesystem
  * @package FreedomCore\TrinityCore\Support
  */
-class Filesystem {
+class Filesystem
+{
 
     /**
      * Path to the public folder
@@ -23,7 +24,8 @@ class Filesystem {
     /**
      * Filesystem constructor.
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->initializeVariables();
     }
 
@@ -31,7 +33,8 @@ class Filesystem {
      * Get public folder path
      * @return string
      */
-    public function getPublicFolder() : string {
+    public function getPublicFolder() : string
+    {
         return $this->publicFolder;
     }
 
@@ -39,7 +42,8 @@ class Filesystem {
      * Get storage folder path
      * @return string
      */
-    public function getStorageFolder() : string {
+    public function getStorageFolder() : string
+    {
         return $this->storageFolder;
     }
 
@@ -47,7 +51,8 @@ class Filesystem {
      * Get data store folder path
      * @return string
      */
-    public function getDataStorage() : string {
+    public function getDataStorage() : string
+    {
         return $this->dataFilesStorage;
     }
 
@@ -55,7 +60,8 @@ class Filesystem {
      * Get Structures folder path
      * @return string
      */
-    public function getStructuresFolder() : string {
+    public function getStructuresFolder() : string
+    {
         return __DIR__ . DIRECTORY_SEPARATOR . 'DB2Reader' . DIRECTORY_SEPARATOR . 'Structures' . DIRECTORY_SEPARATOR;
     }
 
@@ -63,7 +69,8 @@ class Filesystem {
      * Set public folder path
      * @param string $path
      */
-    public function setPublicFolder(string $path) {
+    public function setPublicFolder(string $path)
+    {
         $this->publicFolder = $path;
     }
 
@@ -71,7 +78,8 @@ class Filesystem {
      * Set storage folder path
      * @param string $path
      */
-    public function setStorageFolder(string $path) {
+    public function setStorageFolder(string $path)
+    {
         $this->storageFolder = $path;
     }
 
@@ -79,7 +87,8 @@ class Filesystem {
      * Set data store folder path
      * @param string $path
      */
-    public function setDataStorage(string $path) {
+    public function setDataStorage(string $path)
+    {
         $this->dataFilesStorage = $path;
     }
 
@@ -89,7 +98,8 @@ class Filesystem {
      * @param string $fileName
      * @return bool
      */
-    public static function fileExists(string $path, string $fileName = '') : bool {
+    public static function fileExists(string $path, string $fileName = '') : bool
+    {
         $fullPath = (strlen($fileName) > 1) ? $path . DIRECTORY_SEPARATOR . $fileName : $path;
         return file_exists($fullPath);
     }
@@ -99,8 +109,9 @@ class Filesystem {
      * @param string $path
      * @return array
      */
-    public static function foldersInFolder(string $path) : array {
-        return array_map(function(string $value) {
+    public static function foldersInFolder(string $path) : array
+    {
+        return array_map(function (string $value) {
             return str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $value);
         }, glob($path . '/*', GLOB_ONLYDIR));
     }
@@ -110,8 +121,9 @@ class Filesystem {
      * @param string $path
      * @return array
      */
-    public static function filesInFolder(string $path) : array {
-        return array_map(function(string $value) {
+    public static function filesInFolder(string $path) : array
+    {
+        return array_map(function (string $value) {
             return str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $value);
         }, glob($path . '/*', GLOB_NOSORT));
     }
@@ -119,7 +131,8 @@ class Filesystem {
     /**
      * Initialize required variables.
      */
-    private function initializeVariables() {
+    private function initializeVariables()
+    {
         $this->publicFolder = getcwd();
         $this->storageFolder = function_exists('storage_path') ?
             storage_path() :

@@ -4,7 +4,8 @@
  * Class Helper
  * @package FreedomCore\TrinityCore\Support\Common
  */
-class Helper {
+class Helper
+{
 
     /**
      * Implementation of the recursive array search by key => $value
@@ -13,7 +14,8 @@ class Helper {
      * @param $value
      * @return array
      */
-    public static function arrayMultiSearch(array $array, string $key, $value) : array {
+    public static function arrayMultiSearch(array $array, string $key, $value) : array
+    {
         $results = [];
         Helper::array_multi_search_base($array, $key, $value, $results);
         return $results;
@@ -24,7 +26,8 @@ class Helper {
      * @param string $characterName
      * @return string
      */
-    public static function getCharacterName(string $characterName) : string {
+    public static function getCharacterName(string $characterName) : string
+    {
         return ucfirst(strtolower($characterName));
     }
 
@@ -33,7 +36,8 @@ class Helper {
      * @param string $message
      * @throws \RuntimeException
      */
-    public static function throwRuntimeException(string $message) {
+    public static function throwRuntimeException(string $message)
+    {
         $trace = debug_backtrace()[1];
         $callParameters = [
             'class'         =>  substr(strrchr($trace['class'], "\\"), 1),
@@ -49,15 +53,18 @@ class Helper {
      * @param $value
      * @param array $results
      */
-    private static function array_multi_search_base($array, string $key, $value, array &$results) {
-        if (!is_array($array))
+    private static function array_multi_search_base($array, string $key, $value, array &$results)
+    {
+        if (!is_array($array)) {
             return;
+        }
 
-        if (isset($array[$key]) && $array[$key] === $value)
+        if (isset($array[$key]) && $array[$key] === $value) {
             $results[] = $array;
+        }
 
-        foreach ($array as $subArray)
+        foreach ($array as $subArray) {
             Helper::array_multi_search_base($subArray, $key, $value, $results);
+        }
     }
-
 }

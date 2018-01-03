@@ -7,7 +7,8 @@ use FreedomCore\TrinityCore\Support\DB2Reader\FileManager;
  * Class WDB2
  * @package FreedomCore\TrinityCore\Support\DB2Reader\Processor
  */
-class WDB2 extends BaseFormat {
+class WDB2 extends BaseFormat
+{
 
     /**
      * WDB2 constructor.
@@ -15,7 +16,8 @@ class WDB2 extends BaseFormat {
      * @param array $stringFields
      * @throws \Exception
      */
-    public function __construct(FileManager $fileManager, array $stringFields = []) {
+    public function __construct(FileManager $fileManager, array $stringFields = [])
+    {
         parent::__construct($fileManager, $stringFields);
         $this->processBlocks()->processRecordFormat()->finalizeProcessing();
     }
@@ -25,7 +27,8 @@ class WDB2 extends BaseFormat {
      * @return WDB2
      * @throws \Exception
      */
-    public function processBlocks() : WDB2 {
+    public function processBlocks() : WDB2
+    {
         $this->idBlockPosition = $this->headerSize;
         if ($this->hasIdBlock) {
             $this->headerSize += 6 * ($this->maxId - $this->minId + 1);
@@ -40,7 +43,8 @@ class WDB2 extends BaseFormat {
      * @inheritdoc
      * @return WDB2
      */
-    public function processRecordFormat() : WDB2 {
+    public function processRecordFormat() : WDB2
+    {
         $this->recordFormat = [];
         for ($field = 0; $field < $this->fieldCount; $field++) {
             $this->recordFormat[$field] = [
@@ -61,10 +65,10 @@ class WDB2 extends BaseFormat {
      * @inheritdoc
      * @return WDB2
      */
-    public function finalizeProcessing() : WDB2 {
+    public function finalizeProcessing() : WDB2
+    {
         $this->populateIdMap();
         $this->guessFieldTypes();
         return $this;
     }
-    
 }

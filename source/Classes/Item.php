@@ -1,4 +1,5 @@
 <?php namespace FreedomCore\TrinityCore\Support\Classes;
+
 use FreedomCore\TrinityCore\Character\Models\CharacterInventory;
 use FreedomCore\TrinityCore\Character\Models\ItemInstance;
 use FreedomCore\TrinityCore\Support\Common\Helper;
@@ -8,7 +9,8 @@ use FreedomCore\TrinityCore\Support\DB2Reader;
  * Class Item
  * @package FreedomCore\TrinityCore\Support\Classes
  */
-class Item {
+class Item
+{
 
     /**
      * Character Inventory Model Instance
@@ -213,11 +215,13 @@ class Item {
      * @param CharacterInventory|null $inventory
      * @param ItemInstance|null $instance
      */
-    public function __construct(CharacterInventory $inventory = null, ItemInstance $instance = null) {
+    public function __construct(CharacterInventory $inventory = null, ItemInstance $instance = null)
+    {
         $this->inventory = $inventory;
         $this->instance = $instance;
-        if ($this->inventory !== null && $this->instance !== null)
+        if ($this->inventory !== null && $this->instance !== null) {
             $this->processPassedData();
+        }
     }
 
     /**
@@ -225,13 +229,15 @@ class Item {
      * @param DB2Reader|null $reader
      * @return Item
      */
-    public function attachReader(DB2Reader $reader = null) : Item {
+    public function attachReader(DB2Reader $reader = null) : Item
+    {
         if ($reader === null) {
             $reader = new DB2Reader(true);
             $this->enableDynamicDataLoading = false;
         }
-        if (!$reader->isFileOpened())
+        if (!$reader->isFileOpened()) {
             Helper::throwRuntimeException('You need to pass instance of the DB2Reader with opened ItemSparse file!');
+        }
         $this->reader = $reader;
         return $this;
     }
@@ -242,7 +248,8 @@ class Item {
      * @return Item
      * @throws \Exception
      */
-    public function autoloadItemData(bool $increaseMemoryLimit = false) : Item {
+    public function autoloadItemData(bool $increaseMemoryLimit = false) : Item
+    {
         if ($increaseMemoryLimit) {
             ini_set('memory_limit', '512M');
             set_time_limit(0);
@@ -250,13 +257,14 @@ class Item {
         $memoryLimit = ini_get('memory_limit');
         if (strstr($memoryLimit, 'M')) {
             $memoryLimit = intval(str_replace('M', '', $memoryLimit));
-        } else if (strstr($memoryLimit, 'G')) {
+        } elseif (strstr($memoryLimit, 'G')) {
             $memoryLimit = intval(str_replace('G', '', $memoryLimit)  * 1024);
         } else {
             Helper::throwRuntimeException('We are unable to process memory limit: ' . $memoryLimit);
         }
-        if ($memoryLimit < 512)
+        if ($memoryLimit < 512) {
             Helper::throwRuntimeException('Outside of the console this method requires at least 512M of memory dedicated to PHP. We can try to automatically increase this parameter if you call this method in the following manner autoloadItemData(true)');
+        }
         $this->autoloadItemData = true;
         return $this;
     }
@@ -266,7 +274,8 @@ class Item {
      * @param int $inventoryGuid
      * @return Item
      */
-    public function setInventoryGuid(int $inventoryGuid) : Item {
+    public function setInventoryGuid(int $inventoryGuid) : Item
+    {
         $this->inventoryGuid = $inventoryGuid;
         return $this;
     }
@@ -275,7 +284,8 @@ class Item {
      * Get inventory Guid
      * @return int
      */
-    public function getInventoryGuid() : int {
+    public function getInventoryGuid() : int
+    {
         return $this->inventoryGuid;
     }
 
@@ -284,7 +294,8 @@ class Item {
      * @param int $bagSlot
      * @return Item
      */
-    public function setBagSlot(int $bagSlot) : Item {
+    public function setBagSlot(int $bagSlot) : Item
+    {
         $this->bag = $bagSlot;
         return $this;
     }
@@ -293,7 +304,8 @@ class Item {
      * Get bag slot
      * @return int
      */
-    public function getBagSlot() : int {
+    public function getBagSlot() : int
+    {
         return $this->bag;
     }
 
@@ -302,7 +314,8 @@ class Item {
      * @param int $slot
      * @return Item
      */
-    public function setSlot(int $slot) : Item {
+    public function setSlot(int $slot) : Item
+    {
         $this->slot = $slot;
         return $this;
     }
@@ -311,7 +324,8 @@ class Item {
      * Get item slot
      * @return int
      */
-    public function getSlot() : int {
+    public function getSlot() : int
+    {
         return $this->slot;
     }
 
@@ -320,7 +334,8 @@ class Item {
      * @param int $itemGuid
      * @return Item
      */
-    public function setItemGuid(int $itemGuid) : Item {
+    public function setItemGuid(int $itemGuid) : Item
+    {
         $this->itemGuid = $itemGuid;
         return $this;
     }
@@ -329,7 +344,8 @@ class Item {
      * Get item guid
      * @return int
      */
-    public function getItemGuid() : int {
+    public function getItemGuid() : int
+    {
         return $this->itemGuid;
     }
 
@@ -339,7 +355,8 @@ class Item {
      * @return Item
      * @throws \Exception
      */
-    public function setItemID(int $itemID) : Item {
+    public function setItemID(int $itemID) : Item
+    {
         $this->itemEntry = $itemID;
         if ($this->autoloadItemData) {
             if ($this->enableDynamicDataLoading) {
@@ -356,7 +373,8 @@ class Item {
      * Get item id
      * @return int
      */
-    public function getItemID() : int {
+    public function getItemID() : int
+    {
         return $this->itemEntry;
     }
 
@@ -365,7 +383,8 @@ class Item {
      * @param int $ownerGuid
      * @return Item
      */
-    public function setOwnerGuid(int $ownerGuid) : Item {
+    public function setOwnerGuid(int $ownerGuid) : Item
+    {
         $this->ownerGuid = $ownerGuid;
         return $this;
     }
@@ -374,7 +393,8 @@ class Item {
      * Get owner guid
      * @return int
      */
-    public function getOwnerGuid() : int {
+    public function getOwnerGuid() : int
+    {
         return $this->ownerGuid;
     }
 
@@ -383,7 +403,8 @@ class Item {
      * @param int $creatorGuid
      * @return Item
      */
-    public function setCreatorGuid(int $creatorGuid) : Item {
+    public function setCreatorGuid(int $creatorGuid) : Item
+    {
         $this->creatorGuid = $creatorGuid;
         return $this;
     }
@@ -392,7 +413,8 @@ class Item {
      * Get creator guid
      * @return int
      */
-    public function getCreatorGuid() : int {
+    public function getCreatorGuid() : int
+    {
         return $this->creatorGuid;
     }
 
@@ -401,7 +423,8 @@ class Item {
      * @param int $creatorGuid
      * @return Item
      */
-    public function setGiftCreatorGuid(int $creatorGuid) : Item {
+    public function setGiftCreatorGuid(int $creatorGuid) : Item
+    {
         $this->giftCreatorGuid = $creatorGuid;
         return $this;
     }
@@ -410,7 +433,8 @@ class Item {
      * Get gift creator guid
      * @return int
      */
-    public function getGiftCreatorGuid() : int {
+    public function getGiftCreatorGuid() : int
+    {
         return $this->giftCreatorGuid;
     }
 
@@ -419,7 +443,8 @@ class Item {
      * @param int $count
      * @return Item
      */
-    public function setCount(int $count) : Item {
+    public function setCount(int $count) : Item
+    {
         $this->count = $count;
         return $this;
     }
@@ -428,7 +453,8 @@ class Item {
      * Get count
      * @return int
      */
-    public function getCount() : int {
+    public function getCount() : int
+    {
         return $this->count;
     }
 
@@ -437,7 +463,8 @@ class Item {
      * @param int $duration
      * @return Item
      */
-    public function setDuration(int $duration) : Item {
+    public function setDuration(int $duration) : Item
+    {
         $this->duration = $duration;
         return $this;
     }
@@ -447,7 +474,8 @@ class Item {
      * @param string $charges
      * @return Item
      */
-    public function setCharges(string $charges) : Item {
+    public function setCharges(string $charges) : Item
+    {
         $this->charges = $charges;
         return $this;
     }
@@ -457,7 +485,8 @@ class Item {
      * @param int $flags
      * @return Item
      */
-    public function setFlags(int $flags) : Item {
+    public function setFlags(int $flags) : Item
+    {
         $this->flags = $flags;
         return $this;
     }
@@ -467,7 +496,8 @@ class Item {
      * @param string $enchantments
      * @return Item
      */
-    public function setEnchantments(string $enchantments) : Item {
+    public function setEnchantments(string $enchantments) : Item
+    {
         $this->enchantments = $enchantments;
         return $this;
     }
@@ -478,7 +508,8 @@ class Item {
      * @param int $id
      * @return Item
      */
-    public function setRandomProperty(int $type, int $id) : Item {
+    public function setRandomProperty(int $type, int $id) : Item
+    {
         $this->randomPropertyType = $type;
         $this->randomPropertyId = $id;
         return $this;
@@ -489,7 +520,8 @@ class Item {
      * @param int $durability
      * @return Item
      */
-    public function setDurability(int $durability) : Item {
+    public function setDurability(int $durability) : Item
+    {
         $this->durability = $durability;
         return $this;
     }
@@ -499,7 +531,8 @@ class Item {
      * @param int $playTime
      * @return Item
      */
-    public function setPlayedTime(int $playTime) : Item {
+    public function setPlayedTime(int $playTime) : Item
+    {
         $this->playedTime = $playTime;
         return $this;
     }
@@ -509,7 +542,8 @@ class Item {
      * @param string $text
      * @return Item
      */
-    public function setText(string $text) : Item {
+    public function setText(string $text) : Item
+    {
         $this->text = $text;
         return $this;
     }
@@ -519,7 +553,8 @@ class Item {
      * @param int $transmog
      * @return Item
      */
-    public function setTransmogrification(int $transmog) : Item {
+    public function setTransmogrification(int $transmog) : Item
+    {
         $this->transmogrification = $transmog;
         return $this;
     }
@@ -529,7 +564,8 @@ class Item {
      * @param int $upgradeID
      * @return Item
      */
-    public function setUpgradeID(int $upgradeID) : Item {
+    public function setUpgradeID(int $upgradeID) : Item
+    {
         $this->upgradeId = $upgradeID;
         return $this;
     }
@@ -539,7 +575,8 @@ class Item {
      * @param int $illusionID
      * @return Item
      */
-    public function setEnchantIllusion(int $illusionID) : Item {
+    public function setEnchantIllusion(int $illusionID) : Item
+    {
         $this->enchantIllusion = $illusionID;
         return $this;
     }
@@ -549,7 +586,8 @@ class Item {
      * @param array $bonuses
      * @return Item
      */
-    public function setBonusList(array $bonuses) : Item {
+    public function setBonusList(array $bonuses) : Item
+    {
         $this->bonusListIDs = implode(',', $bonuses);
         return $this;
     }
@@ -558,7 +596,8 @@ class Item {
      * Get Character Inventory Entry
      * @return CharacterInventory
      */
-    public function getInventory() : CharacterInventory {
+    public function getInventory() : CharacterInventory
+    {
         return $this->inventory;
     }
 
@@ -566,7 +605,8 @@ class Item {
      * Get updated Character Inventory Entry
      * @return CharacterInventory
      */
-    public function getUpdatedInventory() : CharacterInventory {
+    public function getUpdatedInventory() : CharacterInventory
+    {
         return new CharacterInventory([
             'guid'      =>  $this->inventoryGuid,
             'bag'       =>  $this->bag,
@@ -579,7 +619,8 @@ class Item {
      * Get Item Instance
      * @return ItemInstance
      */
-    public function getInstance() : ItemInstance {
+    public function getInstance() : ItemInstance
+    {
         return $this->instance;
     }
 
@@ -587,7 +628,8 @@ class Item {
      * Get updated Item Instance
      * @return ItemInstance
      */
-    public function getUpdatedInstance() : ItemInstance {
+    public function getUpdatedInstance() : ItemInstance
+    {
         return new ItemInstance([
             'guid'                  =>  $this->itemGuid,
             'itemEntry'             =>  $this->itemEntry,
@@ -620,12 +662,15 @@ class Item {
      * Are we working with the armor gear piece
      * @return bool
      */
-    public function isArmor() : bool {
-        if ($this->slot === null)
+    public function isArmor() : bool
+    {
+        if ($this->slot === null) {
             Helper::throwRuntimeException('Unable to determine if piece of gear is belongs to armor type without slot specified!');
+        }
         $armorSlots = [0, 2, 4, 5, 6, 7, 8, 9, 14];
-        if (in_array($this->slot, $armorSlots))
+        if (in_array($this->slot, $armorSlots)) {
             return true;
+        }
         return false;
     }
 
@@ -633,12 +678,15 @@ class Item {
      * Are we working with the weapon gear piece
      * @return bool
      */
-    public function isWeapon() : bool {
-        if ($this->slot === null)
+    public function isWeapon() : bool
+    {
+        if ($this->slot === null) {
             Helper::throwRuntimeException('Unable to determine if piece of gear is belongs to weapon type without slot specified!');
+        }
         $weaponSlots = [15, 16, 17];
-        if (in_array($this->slot, $weaponSlots))
+        if (in_array($this->slot, $weaponSlots)) {
             return true;
+        }
         return false;
     }
 
@@ -646,9 +694,11 @@ class Item {
      * Get item quality
      * @return int
      */
-    public function getQuality() : int {
-        if (empty($this->autoloadedItemData))
+    public function getQuality() : int
+    {
+        if (empty($this->autoloadedItemData)) {
             Helper::throwRuntimeException('Item must be loaded automatically to enable use of this method!');
+        }
         return $this->autoloadedItemData['quality'];
     }
 
@@ -656,9 +706,11 @@ class Item {
      * Get item level
      * @return int
      */
-    public function getItemLevel() : int {
-        if (empty($this->autoloadedItemData))
+    public function getItemLevel() : int
+    {
+        if (empty($this->autoloadedItemData)) {
             Helper::throwRuntimeException('Item must be loaded automatically to enable use of this method!');
+        }
         return $this->autoloadedItemData['item_level'];
     }
 
@@ -666,9 +718,11 @@ class Item {
      * Get level required for this item to be able to equip it
      * @return int
      */
-    public function getRequiredLevel() : int {
-        if (empty($this->autoloadedItemData))
+    public function getRequiredLevel() : int
+    {
+        if (empty($this->autoloadedItemData)) {
             Helper::throwRuntimeException('Item must be loaded automatically to enable use of this method!');
+        }
         return $this->autoloadedItemData['required_level'];
     }
 
@@ -676,9 +730,11 @@ class Item {
      * Get inventory type
      * @return int
      */
-    public function getInventoryType() : int {
-        if (empty($this->autoloadedItemData))
+    public function getInventoryType() : int
+    {
+        if (empty($this->autoloadedItemData)) {
             Helper::throwRuntimeException('Item must be loaded automatically to enable use of this method!');
+        }
         return $this->autoloadedItemData['inventory_type'];
     }
 
@@ -686,7 +742,8 @@ class Item {
      * Get item sub class
      * @return int
      */
-    public function getSubClass() : int {
+    public function getSubClass() : int
+    {
         Helper::throwRuntimeException('This method is not implemented!');
     }
 
@@ -695,7 +752,8 @@ class Item {
      * @param array $itemData
      * @return Item
      */
-    public function debugSetAutoloadedItemData(array $itemData) : Item {
+    public function debugSetAutoloadedItemData(array $itemData) : Item
+    {
         $this->autoloadedItemData = $itemData;
         return $this;
     }
@@ -704,7 +762,8 @@ class Item {
      * Get data for freedomcore/trinitycore-console as array
      * @return array
      */
-    public function getDataForConsoleAsArray() : array {
+    public function getDataForConsoleAsArray() : array
+    {
         return [
             'id'    =>  $this->itemEntry,
             'count' =>  $this->count
@@ -715,29 +774,31 @@ class Item {
      * Get data for freedomcore/trinitycore-console as command attribute
      * @return string
      */
-    public function getDataForConsoleAsCommandAttribute() : string {
+    public function getDataForConsoleAsCommandAttribute() : string
+    {
         return implode(':', $this->getDataForConsoleAsArray());
     }
 
     /**
      * Process data passed by the user
      */
-    private function processPassedData() {
+    private function processPassedData()
+    {
         foreach ($this->instance->toArray() as $key => $value) {
-            if ($key === 'guid')
+            if ($key === 'guid') {
                 $this->itemGuid = $value;
-            else if ($key === 'owner_guid')
+            } elseif ($key === 'owner_guid') {
                 $this->ownerGuid = $value;
-            else
-                if (property_exists($this, $key))
-                    $this->$key = $value;
+            } elseif (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
         }
         foreach ($this->inventory->toArray() as $key => $value) {
-            if ($key === 'guid')
+            if ($key === 'guid') {
                 $this->inventoryGuid = $value;
-            else
-                if (property_exists($this, $key))
-                    $this->$key = $value;
+            } elseif (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
         }
     }
 }

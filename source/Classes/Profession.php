@@ -9,7 +9,8 @@ use Illuminate\Support\Collection;
  * Class Profession
  * @package FreedomCore\TrinityCore\Support\Classes
  */
-class Profession {
+class Profession
+{
 
     /**
      * ID of the profession
@@ -52,7 +53,8 @@ class Profession {
      * @param int $profession
      * @param int $level
      */
-    public function __construct(int $profession = 0, int $level = 0) {
+    public function __construct(int $profession = 0, int $level = 0)
+    {
         $this->professionID = $profession;
         $this->professionLevel = $level;
     }
@@ -62,7 +64,8 @@ class Profession {
      * @param int $profession
      * @return Profession
      */
-    public function setProfessionID(int $profession) : Profession {
+    public function setProfessionID(int $profession) : Profession
+    {
         $this->professionID = $profession;
         return $this;
     }
@@ -72,7 +75,8 @@ class Profession {
      * @param int $level
      * @return Profession
      */
-    public function setProfessionLevel(int $level) : Profession {
+    public function setProfessionLevel(int $level) : Profession
+    {
         $this->professionLevel = $level;
         return $this;
     }
@@ -81,7 +85,8 @@ class Profession {
      * Get profession id
      * @return int
      */
-    public function getProfessionID() : int {
+    public function getProfessionID() : int
+    {
         return $this->professionID;
     }
 
@@ -89,7 +94,8 @@ class Profession {
      * Get profession level
      * @return int
      */
-    public function getProfessionLevel() : int {
+    public function getProfessionLevel() : int
+    {
         return $this->professionLevel;
     }
 
@@ -99,7 +105,8 @@ class Profession {
      * @return Profession
      * @throws \Exception
      */
-    public function loadProfessions(DB2Reader $reader) : Profession {
+    public function loadProfessions(DB2Reader $reader) : Profession
+    {
         $reader->openFile('SkillLine');
         $professions = [];
         foreach ($reader->generateRecords() as $index => $record) {
@@ -116,15 +123,18 @@ class Profession {
      * Load character professions
      * @param Character $character
      */
-    public function loadCharacterProfessions(Character $character) {
-        if (empty($this->professions))
+    public function loadCharacterProfessions(Character $character)
+    {
+        if (empty($this->professions)) {
             throw new \RuntimeException('You have to call the loadProfessions() method before loading the professions for the character!');
+        }
         $skills = $character->skills;
         $professions = [];
         foreach ($skills as $skill) {
             $searchResults = Helper::arrayMultiSearch($this->professions, 'id', $skill->skill);
-            if (!empty($searchResults))
+            if (!empty($searchResults)) {
                 $professions[] = $skill;
+            }
         }
         $this->characterProfessions = collect($professions);
     }
@@ -133,7 +143,8 @@ class Profession {
      * Get list of available professions
      * @return array
      */
-    public function getAvailableProfessions() : array {
+    public function getAvailableProfessions() : array
+    {
         return $this->professions;
     }
 
@@ -141,8 +152,8 @@ class Profession {
      * Get character professions
      * @return \Illuminate\Support\Collection
      */
-    public function getCharacterProfessions() : Collection {
+    public function getCharacterProfessions() : Collection
+    {
         return $this->characterProfessions;
     }
-
 }

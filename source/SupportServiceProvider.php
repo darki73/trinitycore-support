@@ -6,12 +6,14 @@ use Illuminate\Support\ServiceProvider;
  * Class SupportServiceProvider
  * @package FreedomCore\TrinityCore\Support
  */
-class SupportServiceProvider extends ServiceProvider {
+class SupportServiceProvider extends ServiceProvider
+{
 
     /**
      * Register Service Provider
      */
-    public function register() {
+    public function register()
+    {
         if ($this->app->runningInConsole()) {
             $this->registerConsoleCommands();
         }

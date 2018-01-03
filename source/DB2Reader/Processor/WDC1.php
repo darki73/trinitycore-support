@@ -7,7 +7,8 @@ use FreedomCore\TrinityCore\Support\DB2Reader\FileManager;
  * Class WDC1
  * @package FreedomCore\TrinityCore\Support\DB2Reader\Processor
  */
-class WDC1 extends BaseFormat {
+class WDC1 extends BaseFormat
+{
 
     /**
      * WDC1 constructor.
@@ -15,7 +16,8 @@ class WDC1 extends BaseFormat {
      * @param array $stringFields
      * @throws \Exception
      */
-    public function __construct(FileManager $fileManager, array $stringFields = []) {
+    public function __construct(FileManager $fileManager, array $stringFields = [])
+    {
         parent::__construct($fileManager, $stringFields);
         $this->processBlocks()->processRecordFormat()->finalizeProcessing();
     }
@@ -24,7 +26,8 @@ class WDC1 extends BaseFormat {
      * @inheritdoc
      * @return WDC1
      */
-    public function processBlocks() : WDC1 {
+    public function processBlocks() : WDC1
+    {
         if ($this->fieldStorageInfoSize != $this->totalFieldCount * 24) {
             throw new \Exception(sprintf('Expected %d bytes for storage info, instead found %d', $this->totalFieldCount * 24, $this->fieldStorageInfoSize));
         }
@@ -51,7 +54,8 @@ class WDC1 extends BaseFormat {
      * @inheritdoc
      * @return WDC1
      */
-    public function processRecordFormat() : WDC1 {
+    public function processRecordFormat() : WDC1
+    {
         fseek($this->fileHandle, $this->headerLength);
         $this->recordFormat = [];
         for ($fieldId = 0; $fieldId < $this->fieldCount; $fieldId++) {
@@ -146,7 +150,8 @@ class WDC1 extends BaseFormat {
      * @inheritdoc
      * @return WDC1
      */
-    public function finalizeProcessing() : WDC1 {
+    public function finalizeProcessing() : WDC1
+    {
         $this->populateIdMap();
         if ($this->hasEmbeddedStrings) {
             for ($fieldId = 0; $fieldId < $this->fieldCount; $fieldId++) {
@@ -163,5 +168,4 @@ class WDC1 extends BaseFormat {
         $this->guessFieldTypes();
         return $this;
     }
-
 }

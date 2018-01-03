@@ -5,7 +5,8 @@
  * @package FreedomCore\TrinityCore\Support\Classes
  * @see http://wowwiki.wikia.com/wiki/Durability
  */
-class Durability {
+class Durability
+{
 
     protected $item = null;
 
@@ -88,7 +89,8 @@ class Durability {
      * Durability constructor.
      * @param Item $item
      */
-    public function __construct(Item $item) {
+    public function __construct(Item $item)
+    {
         $this->item = $item;
     }
 
@@ -96,13 +98,16 @@ class Durability {
      * Get item durability
      * @return int
      */
-    public function getItemDurability() : int {
+    public function getItemDurability() : int
+    {
         $item = $this->item;
-        if (!$item->isArmor() && !$item->isWeapon())
+        if (!$item->isArmor() && !$item->isWeapon()) {
             return 0;
+        }
         $levelPenalty = 1.0;
-        if ($item->getItemLevel() <= 28)
+        if ($item->getItemLevel() <= 28) {
             $levelPenalty = 0.966 - floatval(28 - $item->getitemLevel()) / 54.0;
+        }
         if ($item->isArmor()) {
             $result = 5 * round(25.0 * $this->qualityMultipliers[$item->getQuality()] * $this->armorMultipliers[$item->getInventoryType()] * $levelPenalty);
         } else {
@@ -110,5 +115,4 @@ class Durability {
         }
         return intval($result);
     }
-
 }

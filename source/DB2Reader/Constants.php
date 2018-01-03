@@ -4,7 +4,8 @@
  * Class Constants
  * @package FreedomCore\TrinityCore\Support\DB2Reader
  */
-class Constants {
+class Constants
+{
 
     const FIELD_TYPE_UNKNOWN = 0;
     const FIELD_TYPE_INT = 1;
@@ -16,5 +17,4 @@ class Constants {
     const FIELD_COMPRESSION_COMMON = 2;
     const FIELD_COMPRESSION_BITPACKED_INDEXED = 3;
     const FIELD_COMPRESSION_BITPACKED_INDEXED_ARRAY = 4;
-
 }

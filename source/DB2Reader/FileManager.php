@@ -10,7 +10,8 @@ use FreedomCore\TrinityCore\Support\DB2Reader\Processor\BaseFormat;
  * Class FileManager
  * @package FreedomCore\TrinityCore\Support\DB2Manager
  */
-class FileManager {
+class FileManager
+{
 
     /**
      * Build Number
@@ -89,7 +90,8 @@ class FileManager {
      * @param Filesystem $fs
      * @param int $build
      */
-    public function __construct(Filesystem $fs, int $build) {
+    public function __construct(Filesystem $fs, int $build)
+    {
         $this->fileSystem = $fs;
         $this->build = $build;
     }
@@ -97,16 +99,19 @@ class FileManager {
     /**
      * FileManager destructor.
      */
-    public function __destruct() {
-        if ($this->fileHandle !== null)
+    public function __destruct()
+    {
+        if ($this->fileHandle !== null) {
             $this->closeFileHandle();
+        }
     }
 
     /**
      * Get file system instance
      * @return Filesystem
      */
-    public function getFileSystem() : Filesystem {
+    public function getFileSystem() : Filesystem
+    {
         return $this->fileSystem;
     }
 
@@ -114,7 +119,8 @@ class FileManager {
      * Set file system instance
      * @param Filesystem $fs
      */
-    public function setFileSystem(Filesystem $fs) {
+    public function setFileSystem(Filesystem $fs)
+    {
         $this->fileSystem = $fs;
     }
 
@@ -122,7 +128,8 @@ class FileManager {
      * Get file handle instance
      * @return null|resource
      */
-    public function getFileHandle() {
+    public function getFileHandle()
+    {
         return $this->fileHandle;
     }
 
@@ -130,7 +137,8 @@ class FileManager {
      * Set file name
      * @param string $fileName
      */
-    public function setFileName(string $fileName) {
+    public function setFileName(string $fileName)
+    {
         $this->fileName = $fileName;
     }
 
@@ -138,7 +146,8 @@ class FileManager {
      * Get file name
      * @return string
      */
-    public function getFileName() : string {
+    public function getFileName() : string
+    {
         return $this->fileName;
     }
 
@@ -146,7 +155,8 @@ class FileManager {
      * Set file handle instance
      * @param $fileHandle
      */
-    public function setFileHandle($fileHandle) {
+    public function setFileHandle($fileHandle)
+    {
         $this->fileHandle = $fileHandle;
     }
 
@@ -154,7 +164,8 @@ class FileManager {
      * Check if file structure exists
      * @return bool
      */
-    public function structureExists() : bool {
+    public function structureExists() : bool
+    {
         return $this->structureExists;
     }
 
@@ -162,7 +173,8 @@ class FileManager {
      * Get File Structure
      * @return null|array
      */
-    public function getStructure() : array {
+    public function getStructure() : array
+    {
         return $this->fileStructure;
     }
 
@@ -170,7 +182,8 @@ class FileManager {
      * Load structure of the data folder
      * @return array
      */
-    public function loadDataDirectory() : array {
+    public function loadDataDirectory() : array
+    {
         $this->dataFolderStructure = [];
         foreach (Filesystem::foldersInFolder($this->fileSystem->getDataStorage()) as $folder) {
             $folderName = str_replace($this->fileSystem->getDataStorage() . DIRECTORY_SEPARATOR, '', $folder);
@@ -188,7 +201,8 @@ class FileManager {
      * Load information about all available DBC languages
      * @return array
      */
-    public function loadAvailableLanguages() : array {
+    public function loadAvailableLanguages() : array
+    {
         if (array_key_exists('dbc', $this->dataFolderStructure)) {
             $this->availableLanguages = [];
             foreach (Filesystem::foldersInFolder($this->dataFolderStructure['dbc']['path']) as $folder) {
@@ -211,7 +225,8 @@ class FileManager {
      * @param string $selectedLanguage
      * @return array
      */
-    public function loadAvailableFiles(string $selectedLanguage) : array {
+    public function loadAvailableFiles(string $selectedLanguage) : array
+    {
         $this->availableFiles = [];
         $filesFolder = $this->dataFolderStructure['dbc']['path'] . DIRECTORY_SEPARATOR . $selectedLanguage;
         foreach (Filesystem::filesInFolder($filesFolder) as $file) {
@@ -230,7 +245,8 @@ class FileManager {
      * Load everything required for operation
      * @param string $selectedLanguage
      */
-    public function loadEverything(string $selectedLanguage) {
+    public function loadEverything(string $selectedLanguage)
+    {
         $this->loadDataDirectory();
         $this->loadAvailableLanguages();
         $this->loadAvailableFiles($selectedLanguage);
@@ -241,7 +257,8 @@ class FileManager {
      * Check if we are ready to perform other tasks
      * @return bool
      */
-    public function isReady() : bool {
+    public function isReady() : bool
+    {
         return $this->loaded;
     }
 
@@ -249,7 +266,8 @@ class FileManager {
      * Get available languages
      * @return array
      */
-    public function getLanguages() : array {
+    public function getLanguages() : array
+    {
         return $this->availableLanguages;
     }
 
@@ -257,7 +275,8 @@ class FileManager {
      * Get available languages as codes
      * @return array
      */
-    public function getLanguageCodes() : array {
+    public function getLanguageCodes() : array
+    {
         return array_map(function (array $language) {
             return $language['name'];
         }, $this->getLanguages());
@@ -267,7 +286,8 @@ class FileManager {
      * Get data folder structure
      * @return array
      */
-    public function getDataFolderStructure() : array {
+    public function getDataFolderStructure() : array
+    {
         return $this->dataFolderStructure;
     }
 
@@ -275,7 +295,8 @@ class FileManager {
      * Get processor instance
      * @return WDB5|WDB2|BaseFormat|null
      */
-    public function getProcessor() {
+    public function getProcessor()
+    {
         return $this->processor;
     }
 
@@ -284,7 +305,8 @@ class FileManager {
      * @param string $fileName
      * @return bool
      */
-    public function isFileAvailable(string $fileName) : bool {
+    public function isFileAvailable(string $fileName) : bool
+    {
         $fileName = $this->formatFileName($fileName);
         return (array_key_exists($fileName, $this->availableFiles));
     }
@@ -295,7 +317,8 @@ class FileManager {
      * @param array $arguments
      * @throws \Exception
      */
-    public function openFile(string $fileName, array $arguments = []) {
+    public function openFile(string $fileName, array $arguments = [])
+    {
         $fileData = $this->availableFiles[$fileName];
         $this->fileName = $fileName;
         $this->fileHandle = fopen($fileData['path'], 'rb');
@@ -309,9 +332,11 @@ class FileManager {
      * @param string $fileName
      * @return string
      */
-    public function formatFileName(string $fileName) : string {
-        if (strstr($fileName, '.db2') || strstr($fileName, '.dbc'))
+    public function formatFileName(string $fileName) : string
+    {
+        if (strstr($fileName, '.db2') || strstr($fileName, '.dbc')) {
             $fileName = str_replace(['.db2', '.dbc'], '', $fileName);
+        }
         return str_replace(['_', '-'], '', $fileName);
     }
 
@@ -321,11 +346,13 @@ class FileManager {
      * @param mixed|null extra
      * @return int
      */
-    public function seekBytes(int $bytes, $extra = null)  {
-        if ($extra !== null)
+    public function seekBytes(int $bytes, $extra = null)
+    {
+        if ($extra !== null) {
             return fseek($this->fileHandle, $bytes, $extra);
-        else
+        } else {
             return fseek($this->fileHandle, $bytes);
+        }
     }
 
     /**
@@ -333,7 +360,8 @@ class FileManager {
      * @param integer $bytes
      * @return bool|string
      */
-    public function readBytes(int $bytes) {
+    public function readBytes(int $bytes)
+    {
         return fread($this->fileHandle, $bytes);
     }
 
@@ -341,7 +369,8 @@ class FileManager {
      * Get file format
      * @return string
      */
-    public function getFormat() : string {
+    public function getFormat() : string
+    {
         return $this->initialProcessing['format'];
     }
 
@@ -349,14 +378,16 @@ class FileManager {
      * Get size of processed file
      * @return int
      */
-    public function getProcessedSize() : int {
+    public function getProcessedSize() : int
+    {
         return $this->initialProcessing['size'];
     }
 
     /**
      * Close file handle
      */
-    protected function closeFileHandle() {
+    protected function closeFileHandle()
+    {
         if ($this->fileHandle !== null) {
             fclose($this->fileHandle);
             $this->fileHandle = null;
@@ -368,7 +399,8 @@ class FileManager {
      * @param string $folderName
      * @return string
      */
-    protected function getFolderType(string $folderName) : string {
+    protected function getFolderType(string $folderName) : string
+    {
         $types = [
             'dbc'   =>  'DBClientFiles',
             'gt'    =>  'GT',
@@ -384,7 +416,8 @@ class FileManager {
     /**
      * Perform initial file processing
      */
-    protected function performInitialProcessing() {
+    protected function performInitialProcessing()
+    {
         $status = fstat($this->fileHandle);
         $this->initialProcessing = [
             'status'    =>  $status,
@@ -398,7 +431,8 @@ class FileManager {
      * @param array $arguments
      * @throws \Exception
      */
-    protected function createProcessor(array $arguments) {
+    protected function createProcessor(array $arguments)
+    {
         switch ($this->getFormat()) {
             case 'WDBC':
             case 'WDB2':
@@ -406,18 +440,19 @@ class FileManager {
                 break;
             case 'WDB5':
             case 'WDB6':
-                if (!is_array($arguments))
+                if (!is_array($arguments)) {
                     throw new \Exception("You may only pass an array of string fields when loading a DB2");
+                }
                 $this->processor = new WDB5($this, $arguments);
                 break;
             case 'WDC1':
-                if (!is_array($arguments))
+                if (!is_array($arguments)) {
                     throw new \Exception("You may only pass an array of string fields when loading a DB2");
+                }
                 $this->processor = new WDC1($this, $arguments);
                 break;
             default:
                 throw new \Exception("Unknown DB2 format: " . $this->getFormat());
-
         }
         if ($this->structureExists()) {
             $this->processor->setFieldNames($this->getStructure());
@@ -429,7 +464,8 @@ class FileManager {
      * @param string $fileName
      * @return $this
      */
-    private function loadStructure(string $fileName) {
+    private function loadStructure(string $fileName)
+    {
         $structureFile = $this->fileSystem->getStructuresFolder() . $this->build . DIRECTORY_SEPARATOR . $fileName . '.txt';
         $fileFound = Filesystem::fileExists($structureFile);
         if ($fileFound) {
@@ -438,5 +474,4 @@ class FileManager {
         }
         return $this;
     }
-
 }

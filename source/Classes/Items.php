@@ -4,7 +4,8 @@
  * Class Items
  * @package FreedomCore\TrinityCore\Support\Classes
  */
-class Items {
+class Items
+{
 
     /**
      * Array of items
@@ -70,5 +71,4 @@ class Items {
         }
         return trim(implode(' ', $items));
     }
-
 }

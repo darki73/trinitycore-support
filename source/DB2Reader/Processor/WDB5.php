@@ -7,7 +7,8 @@ use FreedomCore\TrinityCore\Support\DB2Reader\FileManager;
  * Class WDB5
  * @package FreedomCore\TrinityCore\Support\DB2Reader\Processor
  */
-class WDB5 extends BaseFormat {
+class WDB5 extends BaseFormat
+{
 
     /**
      * WDB5 constructor.
@@ -15,7 +16,8 @@ class WDB5 extends BaseFormat {
      * @param array $stringFields
      * @throws \Exception
      */
-    public function __construct(FileManager $fileManager, array $stringFields = []) {
+    public function __construct(FileManager $fileManager, array $stringFields = [])
+    {
         parent::__construct($fileManager, $stringFields);
         $this->processBlocks()->processRecordFormat()->finalizeProcessing();
     }
@@ -24,7 +26,8 @@ class WDB5 extends BaseFormat {
      * @inheritdoc
      * @return WDB5
      */
-    public function processBlocks() : WDB5 {
+    public function processBlocks() : WDB5
+    {
         if ($this->hasEmbeddedStrings) {
             if (!$this->hasIdBlock) {
                 throw new \Exception("File has embedded strings and no ID block, which was not expected, aborting");
@@ -46,7 +49,8 @@ class WDB5 extends BaseFormat {
      * @inheritdoc
      * @return WDB5
      */
-    public function processRecordFormat() : WDB5 {
+    public function processRecordFormat() : WDB5
+    {
         fseek($this->fileHandle, $this->preambleLength);
         $this->recordFormat = [];
         for ($fieldId = 0; $fieldId < $this->fieldCount; $fieldId++) {
@@ -85,7 +89,8 @@ class WDB5 extends BaseFormat {
      * @inheritdoc
      * @return WDB5
      */
-    public function finalizeProcessing() : WDB5 {
+    public function finalizeProcessing() : WDB5
+    {
         $this->findCommonFields();
         $this->populateIdMap();
         if ($this->hasEmbeddedStrings) {
@@ -100,5 +105,4 @@ class WDB5 extends BaseFormat {
         $this->guessFieldTypes();
         return $this;
     }
-
 }

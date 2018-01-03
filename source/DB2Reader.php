@@ -9,7 +9,8 @@ use FreedomCore\TrinityCore\Support\DB2Reader\Processor\WDB5;
  * Class DB2Reader
  * @package FreedomCore\TrinityCore\Support
  */
-class DB2Reader {
+class DB2Reader
+{
 
     /**
      * File manager instance
@@ -51,13 +52,14 @@ class DB2Reader {
      * DB2Reader constructor.
      * @param bool $initializeImmediately
      */
-    public function __construct(bool $initializeImmediately = false) {
+    public function __construct(bool $initializeImmediately = false)
+    {
         $this->fileSystem = new Filesystem();
         $this->getLatestBuild();
         $this->fileManager = new FileManager($this->fileSystem, $this->getBuild());
-        if ($initializeImmediately)
+        if ($initializeImmediately) {
             $this->fileManager->loadEverything($this->selectedLanguage);
-        else {
+        } else {
             $this->fileManager->loadDataDirectory();
             $this->fileManager->loadAvailableLanguages();
         }
@@ -67,7 +69,8 @@ class DB2Reader {
      * Get file manager instance
      * @return FileManager
      */
-    public function getFileManager() : FileManager {
+    public function getFileManager() : FileManager
+    {
         return $this->fileManager;
     }
 
@@ -75,7 +78,8 @@ class DB2Reader {
      * Set new file manager instance
      * @param FileManager $fileManager
      */
-    public function setFileManager(FileManager $fileManager) {
+    public function setFileManager(FileManager $fileManager)
+    {
         $this->fileManager = $fileManager;
     }
 
@@ -83,7 +87,8 @@ class DB2Reader {
      * Get language currently used for processing
      * @return string
      */
-    public function getLanguage() : string {
+    public function getLanguage() : string
+    {
         return $this->selectedLanguage;
     }
 
@@ -92,20 +97,23 @@ class DB2Reader {
      * @param string $language
      * @param bool $throwIfAny
      */
-    public function setLanguage(string $language, bool $throwIfAny = true) {
+    public function setLanguage(string $language, bool $throwIfAny = true)
+    {
         if (in_array($language, $this->fileManager->getLanguageCodes())) {
             $this->selectedLanguage = $language;
             $this->fileManager->loadEverything($this->selectedLanguage);
         } else {
-            if ($throwIfAny)
+            if ($throwIfAny) {
                 throw new \RuntimeException('Language ' . $language . ' does not exists, you can choose from: [' . implode(', ', $this->fileManager->getLanguageCodes()) . ']');
+            }
         }
     }
 
     /**
      * Get latest build
      */
-    public function getLatestBuild() {
+    public function getLatestBuild()
+    {
         $folders = Filesystem::filesInFolder($this->fileSystem->getStructuresFolder());
         $buildNumbers = [];
         foreach ($folders as $folder) {
@@ -118,7 +126,8 @@ class DB2Reader {
      * Get build used for processing
      * @return int
      */
-    public function getBuild() : int {
+    public function getBuild() : int
+    {
         return ($this->build === null) ? 0 : $this->build;
     }
 
@@ -126,7 +135,8 @@ class DB2Reader {
      * Set build which will be used for processing
      * @param int $build
      */
-    public function setBuild(int $build) {
+    public function setBuild(int $build)
+    {
         $this->build = $build;
     }
 
@@ -135,9 +145,11 @@ class DB2Reader {
      * @param string $fileName
      * @throws \Exception
      */
-    public function openFile(string $fileName) {
-        if (!$this->fileManager->isReady())
+    public function openFile(string $fileName)
+    {
+        if (!$this->fileManager->isReady()) {
             throw new \RuntimeException('Data sources are not loaded!');
+        }
         if ($this->fileManager->isFileAvailable($fileName)) {
             $fileName = $this->fileManager->formatFileName($fileName);
             $this->fileManager->setFileName($fileName);
@@ -153,7 +165,8 @@ class DB2Reader {
      * Check if file is already opened
      * @return bool
      */
-    public function isFileOpened() : bool {
+    public function isFileOpened() : bool
+    {
         return $this->fileOpened;
     }
 
@@ -163,7 +176,8 @@ class DB2Reader {
      * @return array|null
      * @throws \Exception
      */
-    public function getRecord(int $id) {
+    public function getRecord(int $id)
+    {
         return $this->processor->getRecord($id);
     }
 
@@ -172,7 +186,8 @@ class DB2Reader {
      * @return \Generator
      * @throws \Exception
      */
-    public function generateRecords() : \Generator {
+    public function generateRecords() : \Generator
+    {
         return $this->processor->generateRecords();
     }
 
@@ -180,7 +195,8 @@ class DB2Reader {
      * Get indexes
      * @return array
      */
-    public function getIndexes() : array {
+    public function getIndexes() : array
+    {
         return $this->processor->getIDs();
     }
 
@@ -188,7 +204,8 @@ class DB2Reader {
      * Get Processor Instance
      * @return BaseFormat|WDB2|WDB5|null
      */
-    public function getProcessor() {
+    public function getProcessor()
+    {
         return $this->processor;
     }
 
@@ -197,7 +214,8 @@ class DB2Reader {
      * @param array $record
      * @return array
      */
-    public static function flattenRecord(array $record) : array {
+    public static function flattenRecord(array $record) : array
+    {
         $result = [];
         foreach ($record as $k => $v) {
             if (!is_array($v)) {
@@ -211,5 +229,4 @@ class DB2Reader {
         }
         return array_values($result);
     }
-
 }

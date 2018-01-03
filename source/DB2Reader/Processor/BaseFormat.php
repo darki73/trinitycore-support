@@ -9,7 +9,8 @@ use FreedomCore\TrinityCore\Support\DB2Reader\FileManager;
  * @copyright Erorus (https://github.com/erorus) and Darki73 (https://github.com/darki73)
  * @see https://github.com/erorus/db2/blob/master/src/Erorus/DB2/Reader.php
  */
-abstract class BaseFormat implements IFormat {
+abstract class BaseFormat implements IFormat
+{
 
     /**
      * File Manager Instance
@@ -323,7 +324,8 @@ abstract class BaseFormat implements IFormat {
      * @param array $stringFields
      * @throws \Exception
      */
-    public function __construct(FileManager $fileManager, array $stringFields = []) {
+    public function __construct(FileManager $fileManager, array $stringFields = [])
+    {
         $this->fileManager = $fileManager;
         $this->stringFields = $stringFields;
         $this->setFileHandle()->setFileFormat()->setFileSize()->getFileVersion()->initializeHeaderStructure()->finalPreparations();
@@ -335,7 +337,8 @@ abstract class BaseFormat implements IFormat {
      * @return array|null
      * @throws \Exception
      */
-    public function getRecord(int $id) {
+    public function getRecord(int $id)
+    {
         if (!isset($this->idMap[$id])) {
             return null;
         }
@@ -347,7 +350,8 @@ abstract class BaseFormat implements IFormat {
      * @return \Generator
      * @throws \Exception
      */
-    public function generateRecords() {
+    public function generateRecords()
+    {
         foreach ($this->idMap as $id => $offset) {
             yield $id => $this->getRecordByOffset($offset, $id);
         }
@@ -358,7 +362,8 @@ abstract class BaseFormat implements IFormat {
      * @param bool $byName
      * @return array
      */
-    public function getFieldTypes(bool $byName = true) : array {
+    public function getFieldTypes(bool $byName = true) : array
+    {
         $fieldTypes = [];
         foreach ($this->recordFormat as $fieldID => $format) {
             if ($byName && isset($format['name'])) {
@@ -375,7 +380,8 @@ abstract class BaseFormat implements IFormat {
      * @return array
      * @throws \Exception
      */
-    public function setFieldsSigned(array $fields) {
+    public function setFieldsSigned(array $fields)
+    {
         foreach ($fields as $fieldID => $isSigned) {
             if ($fieldID < 0 || $fieldID >= $this->totalFieldCount) {
                 throw new \Exception("Field ID $fieldID out of bounds: 0-" . ($this->totalFieldCount - 1));
@@ -401,12 +407,14 @@ abstract class BaseFormat implements IFormat {
      * @return array
      * @throws \Exception
      */
-    public function setFieldNames(array $names) {
-        if ($this->totalFieldCount !== count($names))
+    public function setFieldNames(array $names)
+    {
+        if ($this->totalFieldCount !== count($names)) {
             if (in_array('id', $names)) {
                 unset($names[array_search('id', $names)]);
                 $names = array_values($names);
             }
+        }
         foreach ($names as $fieldID => $name) {
             if (!is_numeric($fieldID)) {
                 throw new \Exception("Field ID $fieldID must be numeric");
@@ -436,7 +444,8 @@ abstract class BaseFormat implements IFormat {
      * Get total number of fields in the file
      * @return int
      */
-    public function getFieldCount() {
+    public function getFieldCount()
+    {
         return $this->totalFieldCount;
     }
 
@@ -444,7 +453,8 @@ abstract class BaseFormat implements IFormat {
      * Get layout hash
      * @return int|string
      */
-    public function getLayoutHash() {
+    public function getLayoutHash()
+    {
         return $this->layoutHash;
     }
 
@@ -452,7 +462,8 @@ abstract class BaseFormat implements IFormat {
      * Get list of the IDs
      * @return array
      */
-    public function getIDs() : array {
+    public function getIDs() : array
+    {
         return array_keys($this->idMap);
     }
 
@@ -462,7 +473,8 @@ abstract class BaseFormat implements IFormat {
      * @param int $endPosition
      * @throws \Exception
      */
-    protected function isEndOfFile(int $startPosition, int $endPosition) {
+    protected function isEndOfFile(int $startPosition, int $endPosition)
+    {
         $endOfFile = $startPosition + $endPosition;
         if ($endOfFile != $this->fileSize) {
             throw new \Exception('Expected size: ' . $endOfFile . ', actual size: ' . $this->fileSize);
@@ -473,7 +485,8 @@ abstract class BaseFormat implements IFormat {
      * Populate ID Map
      * @throws \Exception
      */
-    protected function populateIdMap() {
+    protected function populateIdMap()
+    {
         $this->idMap = [];
         if (!$this->hasIdBlock) {
             $this->recordFormat[$this->idField]['signed'] = false;
@@ -515,7 +528,8 @@ abstract class BaseFormat implements IFormat {
      * Guess Type of the fields in the file
      * @throws \Exception
      */
-    protected function guessFieldTypes() {
+    protected function guessFieldTypes()
+    {
         foreach ($this->recordFormat as $fieldID => &$format) {
             if ($format['type'] != Constants::FIELD_TYPE_UNKNOWN || $format['size'] != 4) {
                 continue;
@@ -594,7 +608,8 @@ abstract class BaseFormat implements IFormat {
      * Find Common Fields
      * @throws \Exception
      */
-    protected function findCommonFields() {
+    protected function findCommonFields()
+    {
         $this->commonLookup = [];
         if ($this->commonBlockSize == 0) {
             return;
@@ -684,7 +699,8 @@ abstract class BaseFormat implements IFormat {
     /**
      * Populate record offsets array
      */
-    protected function populateRecordOffsets() {
+    protected function populateRecordOffsets()
+    {
         fseek($this->fileHandle, $this->indexBlockPosition);
         $this->recordOffsets = [];
         if ($this->hasIdsInIndexBlock) {
@@ -733,7 +749,8 @@ abstract class BaseFormat implements IFormat {
      * Detect embedded string fields
      * @throws \Exception
      */
-    protected function detectEmbeddedStringFields() {
+    protected function detectEmbeddedStringFields()
+    {
         $stringFields = [];
         foreach ($this->recordFormat as $fieldID => &$format) {
             if ($format['type'] != Constants::FIELD_TYPE_UNKNOWN || $format['size'] != 4) {
@@ -792,7 +809,8 @@ abstract class BaseFormat implements IFormat {
      * @return array
      * @throws \Exception
      */
-    private function getRecordByOffset(int $recordOffset, bool $id) {
+    private function getRecordByOffset(int $recordOffset, bool $id)
+    {
         if ($recordOffset < 0 || $recordOffset >= $this->recordCount) {
             // @codeCoverageIgnoreStart
             throw new \Exception("Requested record offset $recordOffset out of bounds: 0-" . $this->recordCount);
@@ -811,8 +829,11 @@ abstract class BaseFormat implements IFormat {
                         case Constants::FIELD_COMPRESSION_BITPACKED:
                         case Constants::FIELD_COMPRESSION_BITPACKED_INDEXED:
                         case Constants::FIELD_COMPRESSION_BITPACKED_INDEXED_ARRAY:
-                        $rawValue = BaseFormat::extractValueFromBitstring(substr($record, $format['offset'], $format['valueLength']),
-                                $format['storage']['offsetBits'] % 8, $format['storage']['sizeBits']);
+                            $rawValue = BaseFormat::extractValueFromBitstring(
+                                substr($record, $format['offset'], $format['valueLength']),
+                                $format['storage']['offsetBits'] % 8,
+                                $format['storage']['sizeBits']
+                            );
                             if ($format['storage']['storageType'] == Constants::FIELD_COMPRESSION_BITPACKED) {
                                 $field[] = $rawValue;
                                 continue 2;
@@ -830,8 +851,11 @@ abstract class BaseFormat implements IFormat {
                     }
                 } else {
                     if ($this->hasEmbeddedStrings && $format['type'] == Constants::FIELD_TYPE_STRING) {
-                        $rawValue = substr($record, $runningOffset,
-                            strpos($record, "\x00", $runningOffset) - $runningOffset);
+                        $rawValue = substr(
+                            $record,
+                            $runningOffset,
+                            strpos($record, "\x00", $runningOffset) - $runningOffset
+                        );
                         $runningOffset += strlen($rawValue) + 1;
                         $field[] = $rawValue;
                         continue;
@@ -893,7 +917,8 @@ abstract class BaseFormat implements IFormat {
      * @return mixed
      * @throws \Exception
      */
-    private function getPalletData($storage, $palletId, $valueId) {
+    private function getPalletData($storage, $palletId, $valueId)
+    {
         $recordSize = 4;
         $isArray = $storage['storageType'] == Constants::FIELD_COMPRESSION_BITPACKED_INDEXED_ARRAY;
         if ($isArray) {
@@ -913,7 +938,8 @@ abstract class BaseFormat implements IFormat {
      * @param $id
      * @return bool|string
      */
-    private function getCommonData($storage, $id) {
+    private function getCommonData($storage, $id)
+    {
         $lo = 0;
         $hi = floor($storage['additionalDataSize'] / 8) - 1;
         while ($lo <= $hi) {
@@ -937,7 +963,8 @@ abstract class BaseFormat implements IFormat {
      * @return string
      * @throws \Exception
      */
-    private function getString($stringBlockOffset) {
+    private function getString($stringBlockOffset)
+    {
         if ($stringBlockOffset >= $this->stringBlockSize) {
             // @codeCoverageIgnoreStart
             throw new \Exception("Asked to get string from $stringBlockOffset, string block size is only ".$this->stringBlockSize);
@@ -955,7 +982,8 @@ abstract class BaseFormat implements IFormat {
      * @return bool|string
      * @throws \Exception
      */
-    private function getRawRecord(int $recordOffset, bool $id = false) {
+    private function getRawRecord(int $recordOffset, bool $id = false)
+    {
         if (!is_null($this->recordOffsets)) {
             $pointer = $this->recordOffsets[$recordOffset];
             if ($pointer['size'] == 0) {
@@ -999,7 +1027,8 @@ abstract class BaseFormat implements IFormat {
      * Populate file handle variable
      * @return BaseFormat
      */
-    private function setFileHandle() : BaseFormat {
+    private function setFileHandle() : BaseFormat
+    {
         $this->fileHandle = $this->fileManager->getFileHandle();
         return $this;
     }
@@ -1008,7 +1037,8 @@ abstract class BaseFormat implements IFormat {
      * Populate file format variable
      * @return BaseFormat
      */
-    private function setFileFormat() : BaseFormat {
+    private function setFileFormat() : BaseFormat
+    {
         $this->fileFormat = $this->fileManager->getFormat();
         return $this;
     }
@@ -1017,7 +1047,8 @@ abstract class BaseFormat implements IFormat {
      * Populate file size variable
      * @return BaseFormat
      */
-    private function setFileSize() : BaseFormat {
+    private function setFileSize() : BaseFormat
+    {
         $this->fileSize = $this->fileManager->getProcessedSize();
         return $this;
     }
@@ -1026,7 +1057,8 @@ abstract class BaseFormat implements IFormat {
      * Get File Version Number and Type
      * @return BaseFormat
      */
-    private function getFileVersion() : BaseFormat {
+    private function getFileVersion() : BaseFormat
+    {
         $isWDB = strstr($this->fileFormat, 'WDB') ? true : false;
         if ($isWDB) {
             $this->isWDB = true;
@@ -1042,7 +1074,8 @@ abstract class BaseFormat implements IFormat {
      * Get WDB Version Number
      * @return BaseFormat
      */
-    private function getWDBVersion() : BaseFormat {
+    private function getWDBVersion() : BaseFormat
+    {
         $this->wdbVersion = intval(substr($this->fileFormat, 3));
         $this->isWDC = false;
         return $this;
@@ -1052,7 +1085,8 @@ abstract class BaseFormat implements IFormat {
      * Get WDC Version Number
      * @return BaseFormat
      */
-    private function getWDCVersion() : BaseFormat {
+    private function getWDCVersion() : BaseFormat
+    {
         $this->wdcVersion = intval(substr($this->fileFormat, 3));
         $this->isWDB = false;
         return $this;
@@ -1062,15 +1096,16 @@ abstract class BaseFormat implements IFormat {
      * Initialize File Header Structure
      * @return BaseFormat
      */
-    private function initializeHeaderStructure() : BaseFormat {
+    private function initializeHeaderStructure() : BaseFormat
+    {
         if ($this->isWDB) {
             if ($this->wdbVersion >= 6) {
                 $this->preambleLength = 56;
                 $this->headerFormat = 'V10x/v2y/V2z';
-            } else if ($this->wdbVersion < 6 && $this->wdbVersion > 2) {
+            } elseif ($this->wdbVersion < 6 && $this->wdbVersion > 2) {
                 $this->preambleLength = 48;
                 $this->headerFormat = 'V10x/v2y';
-            } else if ($this->wdbVersion === 2) {
+            } elseif ($this->wdbVersion === 2) {
                 $this->headerFieldCount = 11;
             } else {
                 $this->headerFieldCount = 4;
@@ -1081,7 +1116,7 @@ abstract class BaseFormat implements IFormat {
             } else {
                 $parts = array_values(unpack('V' . $this->headerFieldCount . 'x', fread($this->fileHandle, 4 * $this->headerFieldCount)));
             }
-        } else if ($this->isWDC) {
+        } elseif ($this->isWDC) {
             $this->headerLength = 84;
             $this->headerFormat = 'V10x/v2y/V9z';
             fseek($this->fileHandle, 4);
@@ -1099,7 +1134,8 @@ abstract class BaseFormat implements IFormat {
      * @param array $parts
      * @return BaseFormat
      */
-    private function updateFileStructureData(array $parts) : BaseFormat {
+    private function updateFileStructureData(array $parts) : BaseFormat
+    {
         if ($this->headerFormat === null) {
             $this->recordCount      = $parts[0];
             $this->fieldCount       = $parts[1];
@@ -1164,7 +1200,8 @@ abstract class BaseFormat implements IFormat {
     /**
      * Perform final preparations
      */
-    private function finalPreparations() {
+    private function finalPreparations()
+    {
         if ($this->isWDB) {
             if ($this->wdbVersion >= 5) {
                 $this->headerSize = $this->preambleLength + $this->fieldCount * 4;
@@ -1187,8 +1224,9 @@ abstract class BaseFormat implements IFormat {
      * Throw Runtime Exception with message
      * @param string $message
      */
-    private static function throwRuntimeException(string $message) {
-        throw new \RuntimeException(sprintf('%s::%s(): %s',substr(strrchr(__CLASS__, "\\"), 1), debug_backtrace()[1]['function'], $message));
+    private static function throwRuntimeException(string $message)
+    {
+        throw new \RuntimeException(sprintf('%s::%s(): %s', substr(strrchr(__CLASS__, "\\"), 1), debug_backtrace()[1]['function'], $message));
     }
 
     /**
@@ -1198,7 +1236,8 @@ abstract class BaseFormat implements IFormat {
      * @param $bitLength
      * @return int
      */
-    private function extractValueFromBitstring($bitString, $bitOffset, $bitLength) {
+    private function extractValueFromBitstring($bitString, $bitOffset, $bitLength)
+    {
         if ($bitOffset >= 8) {
             $bitString = substr($bitString, floor($bitOffset / 8));
             $bitOffset &= 7;

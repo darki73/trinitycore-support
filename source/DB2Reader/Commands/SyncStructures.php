@@ -9,7 +9,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
  * Class SyncStructures
  * @package FreedomCore\TrinityCore\Support\DB2Reader\Commands
  */
-class SyncStructures extends Command {
+class SyncStructures extends Command
+{
 
     /**
      * The console command name.
@@ -109,7 +110,8 @@ class SyncStructures extends Command {
     /**
      * Load Source Code
      */
-    private function loadSourceCode() {
+    private function loadSourceCode()
+    {
         $this->content = file_get_contents('https://raw.githubusercontent.com/TrinityCore/TrinityCore/master/src/server/game/DataStores/DB2Structure.h');
         $this->saveLocation = str_replace('Commands', 'Structures', __DIR__) . DIRECTORY_SEPARATOR;
         $extra = '/*' . $this->getBetween($this->content, '/*', 'struct LocalizedString;') . 'struct LocalizedString;';
@@ -123,10 +125,13 @@ class SyncStructures extends Command {
      * @param string $end
      * @return string
      */
-    private function getBetween(string $string, string $start,string $end) : string{
+    private function getBetween(string $string, string $start, string $end) : string
+    {
         $string = ' ' . $string;
         $ini = strpos($string, $start);
-        if ($ini == 0) return '';
+        if ($ini == 0) {
+            return '';
+        }
         $ini += strlen($start);
         $len = strpos($string, $end, $ini) - $ini;
         return substr($string, $ini, $len);
@@ -135,26 +140,31 @@ class SyncStructures extends Command {
     /**
      * Prepare Structures
      */
-    private function prepareStructures() {
+    private function prepareStructures()
+    {
         $skipToEnd = false;
         foreach (explode("\n", $this->content) as $index => $line) {
             $line = trim($line);
-            if (strlen($line) < 2)
+            if (strlen($line) < 2) {
                 continue;
-            if (strstr($line, '#define') || strstr($line, '#pragma pack(pop)') || strstr($line, '#endif'))
+            }
+            if (strstr($line, '#define') || strstr($line, '#pragma pack(pop)') || strstr($line, '#endif')) {
                 continue;
+            }
 
             if (strstr($line, 'struct')) {
                 $this->structureInfo['name'] = trim($this->getBetween($line, 'struct', 'Entry'));
-                if ($this->structureInfo['name'] === 'Criteria')
+                if ($this->structureInfo['name'] === 'Criteria') {
                     $skipToEnd = true;
+                }
                 $this->structureInfo['start'] = $index;
             }
             if (strstr($line, '};')) {
                 $skipToEnd = false;
                 $this->structureInfo['end'] = $index;
-                if (!empty($this->structureInfo['fields']))
+                if (!empty($this->structureInfo['fields'])) {
                     $this->structures[] = $this->structureInfo;
+                }
                 $this->structureInfo = [
                     'name'      =>  null,
                     'start'     =>  null,
@@ -163,16 +173,18 @@ class SyncStructures extends Command {
                 ];
             }
             if ($index > $this->structureInfo['start'] + 1) {
-                if ($skipToEnd)
+                if ($skipToEnd) {
                     continue;
+                }
                 $fieldName = trim(strtok(str_replace($this->replaceArray, '', $line), '/'));
                 if (strstr($fieldName, 'bool') || strstr($fieldName, 'return')) {
                     $skipToEnd = true;
                     continue;
                 }
                 $converted = $this->convertNames($fieldName);
-                if (!strstr($converted, '}') && !$skipToEnd)
+                if (!strstr($converted, '}') && !$skipToEnd) {
                     $this->structureInfo['fields'][] = $converted;
+                }
             }
         }
     }
@@ -180,7 +192,8 @@ class SyncStructures extends Command {
     /**
      * Save Structures
      */
-    private function saveStructures() {
+    private function saveStructures()
+    {
         File::makeDirectory($this->saveLocation . $this->build, 0775, true);
         $progress = new ProgressBar(new ConsoleOutput(), count($this->structures));
         $progress->start();
@@ -201,11 +214,14 @@ class SyncStructures extends Command {
      * @param string $fieldName
      * @return mixed|string
      */
-    private function convertNames(string $fieldName) {
-        if ($fieldName === 'helpers' || $fieldName === 'Helpers' || strstr($fieldName, '('))
+    private function convertNames(string $fieldName)
+    {
+        if ($fieldName === 'helpers' || $fieldName === 'Helpers' || strstr($fieldName, '(')) {
             return '}';
-        if (strstr($fieldName, 'PvP'))
+        }
+        if (strstr($fieldName, 'PvP')) {
             $fieldName = str_replace('PvP', 'Pvp', $fieldName);
+        }
         $splitted = preg_split('/(?<=\\w)(?=[A-Z])/', $fieldName);
         $splitted = array_map('strtolower', $splitted);
         return $this->replaceKnown(implode('_', $splitted));
@@ -216,7 +232,8 @@ class SyncStructures extends Command {
      * @param string $fieldName
      * @return mixed|string
      */
-    private function replaceKnown(string $fieldName) {
+    private function replaceKnown(string $fieldName)
+    {
         $replaceData = [
             ['_i_d', 'i_d', '_id', 'id'],
             ['_u_i', 'u_i', '_ui', 'ui'],
@@ -227,9 +244,9 @@ class SyncStructures extends Command {
             $chunk = array_chunk($array, count($array) / 2);
             $fieldName = str_replace($chunk[0], $chunk[1], $fieldName);
         }
-        if (strstr($fieldName, '['))
+        if (strstr($fieldName, '[')) {
             return strstr($fieldName, '[', true);
+        }
         return $fieldName;
     }
-
 }
